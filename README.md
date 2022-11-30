@@ -1,3 +1,3 @@
 # joost-jansen.github.io
 
-[link to page](joost-jansen.github.io)
+[https://joost-jansen.github.io](https://joost-jansen.github.io)
