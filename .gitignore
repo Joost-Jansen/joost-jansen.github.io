@@ -1,7 +1,8 @@
 # Default ignored files
-/_site/
+Gemfile.lock
+/_site
 /shelf/
-/workspace.xml
+/.idea/workspace.xml
 # Editor-based HTTP Client requests
 /httpRequests/
 # Datasource local storage ignored files
