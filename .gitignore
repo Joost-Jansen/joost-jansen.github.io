@@ -1,4 +1,11 @@
+# Default ignored files
 Gemfile.lock
 .idea
 _site
 jsconfig.json
+/shelf/
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
