@@ -1,17 +1,30 @@
-#volcano-svg {
-    box-sizing: border-box; 
-    position: absolute; 
-    left: 0; 
-    top: 0; 
+#mapSvg {
+    cursor: move; 
+    border: 2px; 
+    border-style: solid; 
+    margin: -2px;
+}
+
+#volcanoes circle {
+    cursor: pointer;
     fill: red;
+    stroke: black;
+    stroke-width: 1px;
+}
+
+#volcanoes circle:hover {
+    fill: #ff8585;
+    stroke: white;
+}
+
+#tooltip {
+    opacity: 1;
+    background-color: white;
+    border: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    border-color: black;
+    padding: 5px;
+    position: absolute;
     pointer-events: none;
-}
-
-circle {
-    pointer-events: auto;
-    fill: green;
-}
-
-circle:hover {
-    fill: blue;
 }

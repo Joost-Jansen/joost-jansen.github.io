@@ -1,18 +1,19 @@
 // @ts-check
 {
-  let dataPath = "../data/";
-  let mapWidth = 1200;
-  let mapHeight = 800;
+  const dataPath = "../data/";
+  const mapWidth = 1200;
+  const mapHeight = 800;
+  const mapZoomfactor = 0.0002;
   let mapZoom = 150;
-  let mapZoomfactor = 0.0002;
   let mapTranslateX = 0;
   let mapTranslateY = 0;
+  const volcanoIconSize = 8;
 
-  let mapSvg = d3.select('#world-map')
+  let mapSvg = d3.select('#worldMap')
     .append("svg")
     .attr("width", mapWidth)
     .attr("height", mapHeight)
-    .attr("style", "cursor:move; border: 2px; border-style: solid; margin: -2px;");
+    .attr("id", "mapSvg");
 
   let countries = mapSvg.append("g")
     .attr("id", "countries");
@@ -32,7 +33,9 @@
     .append("circle")
       .attr("cx", d => projection([d.Longitude, d.Latitude])[0])
       .attr("cy", d => projection([d.Longitude, d.Latitude])[1])
-      .attr("r", 5);    
+      .attr("r", volcanoIconSize)
+    
+    setupTooltip();
   });
 
   // populate svg with countries using the loaded geoData
@@ -65,18 +68,36 @@
   }
 
   // set up zoom input
-  mapSvg.node().onwheel = (e) => {
+  mapSvg.on("wheel", (e) => {
     mapZoom = mapZoom ** (1 - e.deltaY * mapZoomfactor);
     updateMap();
     return false;
-  };
+  });
 
   // set up mouse drag input
-  mapSvg.node().addEventListener("mousemove", (e) => {
+  mapSvg.on("mousemove", (e) => {
     if (e.buttons == 1) { // check if left-button is held
       mapTranslateX += e.movementX / mapZoom;
       mapTranslateY += e.movementY / mapZoom;
       updateMap();
     }
-  });  
+  });
+
+  // create tooltip div
+  let tooltip = d3.select("#worldMap")
+    .append("div")
+    .attr("id", "tooltip");
+  
+  // add tooltip functionality
+  function setupTooltip() {
+    volcanoes.selectAll("circle")
+      .on("mouseover", () => tooltip.style("opacity", 1))
+      .on("mouseleave", () => tooltip.style("opacity", 0))
+      .on("mousemove", (e, d) => {
+        tooltip.html(d.Volcano_Name + "<br>" + "Longitude: " + d.Longitude + "<br>" + 
+                    "Latitude: " + d.Latitude)
+        .style("left", (e.pageX+10) + "px")
+        .style("top", e.pageY + "px");
+      });
+  }
 }
