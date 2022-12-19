@@ -11,6 +11,9 @@
   let eruptionTimeRange = [0, 200];
   const volcanoEruptedColor = "red";
   const volcanoNotEruptedColor = "black";
+  let regionSelectMode = false;
+  let regionMin = [0, 0];
+  let regionMax = [0, 0];
 
   let mapSvg = d3.select('#worldMap')
     .append("svg")
@@ -20,6 +23,8 @@
 
   let countries = mapSvg.append("g")
     .attr("id", "countries");
+  let brushSelection = mapSvg.append("g")
+    .attr("id", "brushSelection");
   let volcanoes = mapSvg.append("g")
     .attr("id", "volcanoes");
 
@@ -27,6 +32,26 @@
     .center([2, 47]) // GPS of location to zoom on
     .scale(mapZoom)
     .translate([ mapWidth / 2, mapHeight / 2 ]);
+  
+
+  // BRUSH STUFF
+
+  let brush = d3.brush()
+    .extent([[-1000, -1000], [5000, 5000]])
+    .on("brush", (e) => {
+      if (regionSelectMode) {
+        regionMin = [(e.selection[0][0] - mapWidth / 2) / mapZoom - mapTranslateX, 
+                    (e.selection[0][1] - mapHeight / 2) / mapZoom - mapTranslateY];
+        regionMax = [(e.selection[1][0] - mapWidth / 2) / mapZoom - mapTranslateX, 
+                    (e.selection[1][1] - mapHeight / 2) / mapZoom - mapTranslateY];
+      }
+  });
+
+  brushSelection
+    .on("mousedown mousemove mouseover mouseleave", (e) => {
+        if (!regionSelectMode) e.stopPropagation();
+      }, true)
+    .call(brush);
 
   // populate svg with countries using the loaded geoData
   d3.json(dataPath + "custom.geo.json").then(function(geoData) {
@@ -68,6 +93,12 @@
     volcanoes.selectAll("circle")
     .attr("cx", d => projection([d.Longitude, d.Latitude])[0])
     .attr("cy", d => projection([d.Longitude, d.Latitude])[1])
+
+    brush
+      .move(brushSelection, [[mapWidth / 2 + (regionMin[0] + mapTranslateX) * mapZoom, 
+                              mapHeight / 2 + (regionMin[1] + mapTranslateY) * mapZoom], 
+                             [mapWidth / 2 + (regionMax[0] + mapTranslateX) * mapZoom, 
+                              mapHeight / 2 + (regionMax[1] + mapTranslateY) * mapZoom]])
   }
 
   // map update function for when eruption time range changes (defined below)
@@ -132,7 +163,7 @@
       mapTranslateY += e.movementY / mapZoom;
       updateMapView();
     }
-  });
+  }, true);
   
   // add tooltip functionality
   function setupTooltip() {
@@ -153,4 +184,28 @@
         .style("top", e.pageY + "px");
       });
   }
+
+  let clearRegionButton = d3.select('#clearRegionButton')
+    .on("click", () => {
+      brush.clear(brushSelection);
+      regionMin = [0, 0];
+      regionMax = [0, 0];
+    });
+  
+  d3.select('#selectRegionButton')
+    .on("click", () => {
+      regionSelectMode = !regionSelectMode;
+      brushSelection
+        .select(".overlay")
+        .style("cursor", regionSelectMode ? "crosshair" : "move");
+      
+      d3.select('#selectRegionButton')
+        .html(regionSelectMode ? "done" : "region select");
+
+      clearRegionButton
+        .attr("disabled", regionSelectMode ? true : null);
+
+      volcanoes
+        .attr("pointer-events", regionSelectMode ? "none" : "auto");
+    });
 }
