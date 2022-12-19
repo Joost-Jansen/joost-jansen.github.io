@@ -13,38 +13,29 @@ var svg = d3.select("#scatterplot")
         "translate(" + margin.left + "," + margin.top + ")");
 
 //Read the data
-d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
-
-    var data = dataNull.filter(function(d)
-    {
-
-        if( d["Last_Eruption_Year"] != "Unknown")
-        {
-            return d;
-        }
-
-    })
+d3.csv('data/GVP_Volcano_List.csv', function(data) {
 
     // List of groups (here I have one group per column)
-    var allGroup = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
-    var prettyNames = d3.scaleOrdinal(["5km", "10km", "30km" , "100km"], allGroup)
+    var allGroupTypes = ['Shield', 'Stratovolcano', 'Caldera', 'Submarine', 'Fissure vent', 'Complex',
+        'Cone', 'Volcanic field', 'Dome', 'Compound', 'Maar', 'Crater', 'Ring', 'Subglacial']
+    var allGroupPopulation = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
+    var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km" , "100km"], allGroupPopulation)
 
     // Reformat the data: we need an array of arrays of {x, y} tuples
-    var dataReady = allGroup.map( function(grpName) { // .map allows to do something for each element of the list
+    var dataReady = allGroupPopulation.map( function(grpName) { // .map allows to do something for each element of the list
         return {
             name: grpName,
             values: data.map(function(d) {
-                return {Volcano_Number: d.Volcano_Number, Volcano_Name: d.Volcano_Name, Country: d.Country, Primary_Volcano_Type: d.Primary_Volcano_Type , Last_Eruption_Year: d.Last_Eruption_Year, value: +d[grpName],};
+                return {Volcano_Number: d.Volcano_Number, Volcano_Name: d.Volcano_Name, Country: d.Country, Primary_Volcano_Type: d.Primary_Volcano_Type , Last_Eruption_Year: +d.Last_Eruption_Year, value: +d[grpName],};
             })
         };
     });
-    // I strongly advise to have a look to dataReady with
-    // console.log(dataReady)
 
     // A color scale: one color for each group
-    var myColor = d3.scaleOrdinal(d3.schemeCategory10, allGroup);
+    var myColor = d3.scaleOrdinal(d3.schemeCategory10, allGroupPopulation);
+    var myColor2 = d3.scaleOrdinal(d3.schemeCategory20, allGroupTypes);
 
-    // ?
+    // hover at plot
     var tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
@@ -105,6 +96,8 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         .attr("r", 3)
         .attr("stroke", "white")
         .attr("pointer-events", "all")
+        // to color on volcano type
+        // .style("fill", function(d){ return myColor2(d.Primary_Volcano_Type) })
         .on('mouseover', function (d) {
             d3.select(this).transition().style("cursor", "pointer")
             d3.selectAll("circle")
@@ -145,7 +138,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         .append("text")
         .attr('x', function(d,i){ return  i*50})
         .attr('y', height + 40)
-        .text(function(d) { return prettyNames(d.name); })
+        .text(function(d) { return prettyNamesPopulation(d.name); })
         .style("fill", function(d){ return myColor(d.name) })
         .style("font-size", 15)
         .on("click", function (d) {
