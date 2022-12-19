@@ -1,0 +1,36 @@
+#mapSvg {
+    cursor: move; 
+    border: 2px; 
+    border-style: solid; 
+    margin: -2px;
+}
+
+#volcanoes circle {
+    cursor: pointer;
+    fill: gray;
+    fill-opacity: 0.5;
+    stroke: rgb(0, 0, 0);
+    stroke-width: 1px;
+}
+
+#volcanoes circle:hover {
+    fill-opacity: 1;
+    stroke: white;
+}
+
+#tooltip {
+    opacity: 0;
+    background-color: white;
+    border: solid;
+    border-width: 1px;
+    border-radius: 5px;
+    border-color: black;
+    padding: 5px;
+    position: absolute;
+    pointer-events: none;
+}
+
+.mapButton {
+    padding: 5px;
+    cursor: pointer;
+}

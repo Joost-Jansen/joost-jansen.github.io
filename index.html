@@ -2,11 +2,19 @@
 <meta charset='utf-8'>
 <html>
 <head>
-    <script src="https://d3js.org/d3.v7.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/world-map/map.js" defer></script>
+    <script type='text/javascript' src='scatterplot.js'></script>
+    <link rel="stylesheet" href="/world-map/map.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="scatterplot"></div>
-<script type='text/javascript' src='scatterplot.js'></script>
+    <div id="scatterplot"></div>
+    
+    <div id="mapSection">
+        <div id="worldMap"></div>
+        <button type="button" class="mapButton" id="selectRegionButton">select region</button> 
+        <button type="button" class="mapButton" id="clearRegionButton">clear</button> 
+    </div>
 </body>
 </html>
