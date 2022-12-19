@@ -1,16 +1,17 @@
+// @ts-check
 {
-    var margin = {top: 20, right: 100, bottom: 50, left: 70},
-        width = 860 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+    var scatterMargin = {top: 20, right: 10, bottom: 50, left: 65}
+    var scatterWidth = 450 - scatterMargin.left - scatterMargin.right
+    var scatterHeight = 300 - scatterMargin.top - scatterMargin.bottom;
 
 // append the svg object to the body of the page
-    var svg = d3.select("#scatterplot")
+    var scatterSvg = d3.select("#scatterplot")
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", scatterWidth + scatterMargin.left + scatterMargin.right)
+        .attr("height", scatterHeight + scatterMargin.top + scatterMargin.bottom)
         .append("g")
         .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
+            "translate(" + scatterMargin.left + "," + scatterMargin.top + ")");
 
 //Read the data
     var dataCSV = d3.csv('data/GVP_Volcano_List.csv')
@@ -51,26 +52,26 @@
 
         var x = d3.scaleLinear()
             .domain([0, 2023])
-            .range([0, width]);
+            .range([0, scatterWidth]);
 
         var y = d3.scaleLinear()
             .domain([0, 50000000])
-            .range([height, 0]);
+            .range([scatterHeight, 0]);
 
         var xAxis = d3.axisBottom(x).ticks(12),
-            yAxis = d3.axisLeft(y).ticks(12 * height / width);
+            yAxis = d3.axisLeft(y).ticks(12 * scatterHeight / scatterWidth);
 
-        var brush = d3.brush().extent([[0, 0], [width, height]]).on("end", function (e) {
+        var brush = d3.brush().extent([[0, 0], [scatterWidth, scatterHeight]]).on("end", function (e) {
                 brushended(e)
             }),
             idleTimeout,
             idleDelay = 350;
 
-        var clip = svg.append("defs").append("svg:clipPath")
-            .attr("id", "clip")
+        var scatterClip = scatterSvg.append("defs").append("svg:clipPath")
+            .attr("id", "clip2")
             .append("svg:rect")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", scatterWidth)
+            .attr("height", scatterHeight)
             .attr("x", 0)
             .attr("y", 0);
 
@@ -79,9 +80,9 @@
         // x.domain(d3.extent(dataReady, function (d) { return d.Last_Eruption_Year; })).nice();
         // y.domain(d3.extent(dataReady, function (d) { return d.value; })).nice();
 
-        var scatter = svg.append("g")
+        var scatter = scatterSvg.append("g")
             .attr("id", "scatterplot")
-            .attr("clip-path", "url(#clip)");
+            .attr("clip-path", "url(#clip2)");
 
         // Add zoom
         scatter.append("g")
@@ -151,7 +152,7 @@
             });
 
         // Add a legend (interactive)
-        svg
+        scatterSvg
             .selectAll("myLegend")
             .data(dataReady)
             .enter()
@@ -160,7 +161,7 @@
             .attr('x', function (d, i) {
                 return i * 50
             })
-            .attr('y', height + 40)
+            .attr('y', scatterHeight + 40)
             .text(function (d) {
                 return prettyNamesPopulation(d.name);
             })
@@ -183,27 +184,27 @@
             })
 
         // Add x-axis
-        svg.append("g")
+        scatterSvg.append("g")
             .attr("class", "x axis")
             .attr('id', "axis--x")
-            .attr("transform", "translate(0," + height + ")")
+            .attr("transform", "translate(0," + scatterHeight + ")")
             .call(xAxis);
 
         // Add x-label
-        svg.append("text")
+        scatterSvg.append("text")
             .style("text-anchor", "end")
-            .attr("x", width)
-            .attr("y", height + 30)
+            .attr("x", scatterWidth)
+            .attr("y", scatterHeight + 30)
             .text("Last eruption year");
 
         // Add y-axis
-        svg.append("g")
+        scatterSvg.append("g")
             .attr("class", "y axis")
             .attr('id', "axis--y")
             .call(yAxis);
 
         // Add y-label
-        svg.append("text")
+        scatterSvg.append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0)
             .attr("dy", "1em")
@@ -211,10 +212,10 @@
             .text("Population");
 
         // Add titel
-        svg.append("text")
+        scatterSvg.append("text")
             .style("text-anchor", "end")
             .style("font-family", "fantasy")
-            .attr("x", width / 1.5)
+            .attr("x", scatterWidth - 50)
             .attr("y", 2)
             .text("Population compared to last eruption year");
 
@@ -242,8 +243,8 @@
         function zoom(e) {
 
             var t = scatter.transition().duration(750);
-            svg.select("#axis--x").transition().call(xAxis);
-            svg.select("#axis--y").transition().call(yAxis);
+            scatterSvg.select("#axis--x").transition().call(xAxis);
+            scatterSvg.select("#axis--y").transition().call(yAxis);
             scatter.selectAll("circle").transition(t)
                 .attr("cx", function (d) {
                     return x(d.Last_Eruption_Year);

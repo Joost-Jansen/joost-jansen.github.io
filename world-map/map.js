@@ -1,8 +1,8 @@
 // @ts-check
 {
   const dataPath = "../data/";
-  const mapWidth = 1200;
-  const mapHeight = 800;
+  const mapWidth = 800;
+  const mapHeight = 400;
   const mapZoomfactor = 0.0002;
   let mapZoom = 150;
   let mapTranslateX = 0;

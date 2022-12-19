@@ -3,22 +3,29 @@
 <html>
 <head>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="histogram/histogram.js" defer ></script>
+    <script src='/scatterplot/scatterplot.js' defer></script>
+    <link rel="stylesheet" href="/scatterplot/scatterplot.css">
     <script src="/world-map/map.js" defer></script>
-
     <link rel="stylesheet" href="/world-map/map.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/d3-simple-slider"></script>
-    <script src="histogram.js" defer></script>
-    <link rel="stylesheet" href="/scatterplot/scatterplot.css">
-    <script type='text/javascript' src='/scatterplot/scatterplot.js' defer></script>
+
 </head>
 <body>
-    <div id="histogram"></div>
-    <div id="scatterplot"></div>
-    <div id="mapSection">
-        <div id="worldMap"></div>
-        <button type="button" class="mapButton" id="selectRegionButton">select region</button> 
-        <button type="button" class="mapButton" id="clearRegionButton">clear</button> 
+
+    <div class="grid-container">
+        <div class="grid-child left">
+            <div id="histogram"></div>
+            <div id="mapSection">
+                <div id="worldMap"></div>
+                <button type="button" class="mapButton" id="selectRegionButton">select region</button>
+                <button type="button" class="mapButton" id="clearRegionButton">clear</button>
+            </div>
+        </div>
+        <div class="grid-child right">
+            <div id="scatterplot"></div>
+        </div>
     </div>
 </body>
 </html>
