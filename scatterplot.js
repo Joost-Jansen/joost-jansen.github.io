@@ -13,13 +13,15 @@ var svg = d3.select("#scatterplot")
         "translate(" + margin.left + "," + margin.top + ")");
 
 //Read the data
-d3.csv('data/GVP_Volcano_List.csv', function(data) {
+var dataCSV = d3.csv('data/GVP_Volcano_List.csv')
+
+dataCSV.then( function(data) {
 
     // List of groups (here I have one group per column)
     var allGroupTypes = ['Shield', 'Stratovolcano', 'Caldera', 'Submarine', 'Fissure vent', 'Complex',
         'Cone', 'Volcanic field', 'Dome', 'Compound', 'Maar', 'Crater', 'Ring', 'Subglacial']
     var allGroupPopulation = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
-    var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km" , "100km"], allGroupPopulation)
+    var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km" , "100km"])
 
     // Reformat the data: we need an array of arrays of {x, y} tuples
     var dataReady = allGroupPopulation.map( function(grpName) { // .map allows to do something for each element of the list
@@ -32,8 +34,8 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
     });
 
     // A color scale: one color for each group
-    var myColor = d3.scaleOrdinal(d3.schemeCategory10, allGroupPopulation);
-    var myColor2 = d3.scaleOrdinal(d3.schemeCategory20, allGroupTypes);
+    var myColor = d3.scaleOrdinal(d3.schemeCategory10);
+    // var myColor2 = d3.scaleOrdinal(d3.schemeCategory20, allGroupTypes);
 
     // hover at plot
     var tooltip = d3.select("body").append("div")
@@ -51,7 +53,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
     var xAxis = d3.axisBottom(x).ticks(12),
         yAxis = d3.axisLeft(y).ticks(12 * height / width);
 
-    var brush = d3.brush().extent([[0, 0], [width, height]]).on("end", brushended),
+    var brush = d3.brush().extent([[0, 0], [width, height]]).on("end", function (e) { brushended(e) } ),
         idleTimeout,
         idleDelay = 350;
 
@@ -98,7 +100,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
         .attr("pointer-events", "all")
         // to color on volcano type
         // .style("fill", function(d){ return myColor2(d.Primary_Volcano_Type) })
-        .on('mouseover', function (d) {
+        .on('mouseover', function (e, d) {
             d3.select(this).transition().style("cursor", "pointer")
             d3.selectAll("circle")
                 .filter(function(dot){
@@ -114,10 +116,10 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
                         "Volcano Type: " + d.Primary_Volcano_Type + "<br>" +
                         "Eruption Year: " + d.Last_Eruption_Year + "<br>" +
                         "Population: " + d3.format(",")(d.value))
-                .style("left", (d3.event.pageX + 10) + "px")
-                .style("top", (d3.event.pageY) + "px");
+                .style("left", (e.pageX + 10) + "px")
+                .style("top", (e.pageY) + "px");
         })
-        .on('mouseout', function (d, i) {
+        .on('mouseout', function (e, d, i) {
             d3.selectAll("circle")
                 .filter(function(dot){
                     return (dot.Volcano_Name == d.Volcano_Name)
@@ -141,7 +143,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
         .text(function(d) { return prettyNamesPopulation(d.name); })
         .style("fill", function(d){ return myColor(d.name) })
         .style("font-size", 15)
-        .on("click", function (d) {
+        .on("click", function (e, d) {
                 // is the element currently visible ?
                 currentOpacity = d3.selectAll("." + d.name).style("opacity")
                 currentOpacityText = d3.select(this).style("opacity");
@@ -151,7 +153,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
                 d3.select(this).transition().style("opacity", currentOpacityText == 1 ? 0.25 : 1)
 
             })
-        .on("mouseover", function (d){
+        .on("mouseover", function (e, d){
         d3.select(this).transition().style("cursor", "pointer")
     })
 
@@ -193,9 +195,9 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
 
 
 
-    function brushended() {
+    function brushended(e) {
 
-        var s = d3.event.selection;
+        var s = e.selection;
         if (!s) {
             if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
             x.domain([0,2023])
@@ -206,18 +208,18 @@ d3.csv('data/GVP_Volcano_List.csv', function(data) {
             y.domain([s[1][1], s[0][1]].map(y.invert, y));
             scatter.select(".brush").call(brush.move, null);
         }
-        zoom();
+        zoom(e);
     }
 
     function idled() {
         idleTimeout = null;
     }
 
-    function zoom() {
+    function zoom(e) {
 
         var t = scatter.transition().duration(750);
-        svg.select("#axis--x").transition(t).call(xAxis);
-        svg.select("#axis--y").transition(t).call(yAxis);
+        svg.select("#axis--x").transition().call(xAxis);
+        svg.select("#axis--y").transition().call(yAxis);
         scatter.selectAll("circle").transition(t)
             .attr("cx", function (d) { return x(d.Last_Eruption_Year); })
             .attr("cy", function (d) { return y(d.value); });
