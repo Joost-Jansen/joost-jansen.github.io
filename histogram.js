@@ -1,8 +1,9 @@
+{
 var margin = {top: 30, right: 60, bottom: 50, left: 30},
     width = 1000 - margin.left - margin.right,
     height = 150 - margin.top - margin.bottom;
 
-var svg = d3.select("body")
+var svg = d3.select("#histogram")
     .append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.bottom + margin.top)
@@ -16,7 +17,7 @@ var palette = {
 
 
 
-d3.csv('GVP_Eruption_Results.csv').then((data) => {
+d3.csv('data/GVP_Eruption_Results.csv').then((data) => {
 
     /**
      * xScale with slider
@@ -162,3 +163,4 @@ d3.csv('GVP_Eruption_Results.csv').then((data) => {
         .style("pointer-event", "all")
         .call(pan);
 });
+};
