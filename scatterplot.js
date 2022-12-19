@@ -24,6 +24,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         }
 
     })
+
     // List of groups (here I have one group per column)
     var allGroup = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
     var prettyNames = d3.scaleOrdinal(["5km", "10km", "30km" , "100km"], allGroup)
@@ -33,12 +34,12 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         return {
             name: grpName,
             values: data.map(function(d) {
-                return {Last_Eruption_Year: d.Last_Eruption_Year, value: +d[grpName]};
+                return {Volcano_Number: d.Volcano_Number, Volcano_Name: d.Volcano_Name, Country: d.Country, Primary_Volcano_Type: d.Primary_Volcano_Type , Last_Eruption_Year: d.Last_Eruption_Year, value: +d[grpName],};
             })
         };
     });
     // I strongly advise to have a look to dataReady with
-    console.log(dataReady)
+    // console.log(dataReady)
 
     // A color scale: one color for each group
     var myColor = d3.scaleOrdinal(d3.schemeCategory10, allGroup);
@@ -80,6 +81,11 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         .attr("id", "scatterplot")
         .attr("clip-path", "url(#clip)");
 
+    // Add zoom
+    scatter.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
     // Add the points
     scatter
         // First we need to enter in a group
@@ -98,6 +104,37 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         .attr("cy", function(d) { return y(d.value) } )
         .attr("r", 3)
         .attr("stroke", "white")
+        .attr("pointer-events", "all")
+        .on('mouseover', function (d) {
+            d3.select(this).transition().style("cursor", "pointer")
+            d3.selectAll("circle")
+                .filter(function(dot){
+                return (dot.Volcano_Number == d.Volcano_Number)
+            })
+                .transition()
+                .duration('100')
+                .attr("r", 5);
+            tooltip.transition()
+                .duration(100)
+                .style("opacity", 1);
+        tooltip.html(   "Volcano Name: " + d.Volcano_Name + "<br>" +
+                        "Volcano Type: " + d.Primary_Volcano_Type + "<br>" +
+                        "Eruption Year: " + d.Last_Eruption_Year + "<br>" +
+                        "Population: " + d3.format(",")(d.value))
+                .style("left", (d3.event.pageX + 10) + "px")
+                .style("top", (d3.event.pageY) + "px");
+        })
+        .on('mouseout', function (d, i) {
+            d3.selectAll("circle")
+                .filter(function(dot){
+                    return (dot.Volcano_Name == d.Volcano_Name)
+                }).transition()
+                .duration('200')
+                .attr("r", 3);
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0);
+        });
 
     // Add a legend (interactive)
     svg
@@ -161,10 +198,7 @@ d3.csv('data/GVP_Volcano_List.csv', function(dataNull) {
         .attr("y",  2)
         .text("Population compared to last eruption year");
 
-    // Add zoom
-    scatter.append("g")
-        .attr("class", "brush")
-        .call(brush);
+
 
     function brushended() {
 
