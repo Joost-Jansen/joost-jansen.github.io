@@ -1,15 +1,4 @@
 // @ts-check
-
-// global variables
-// @ts-ignore
-let volcanoes = undefined;
-// @ts-ignore
-let isVolcanoInsideRegion = (c) => undefined;
-// @ts-ignore
-let onRegionAdjustEvents = [];
-// @ts-ignore
-let onMapReadyEvents = [];
-
 {
   const dataPath = "../data/";
   const mapWidth = 800;
