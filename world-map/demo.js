@@ -23,9 +23,28 @@
         if (isVolcanoInsideRegion(c))
           selectedVolcanoNames.push(d.Volcano_Name);
       });
+    updateScatterplot(selectedVolcanoNames, [])
+}
 
-    console.log(selectedVolcanoNames);
-  }  
+  function updateScatterplot(selectedVolcanoNames, hoverVolcanoNames){
+      scatter.selectAll("circle")
+          .filter(function (dot) {
+              return ( selectedVolcanoNames.indexOf(dot.Volcano_Name) != -1)
+          })
+          .transition()
+          .duration('100')
+          .attr("r", 3)
+          .style("opacity", 1);
+
+      scatter.selectAll("circle")
+          .filter(function (dot) {
+              return ( selectedVolcanoNames.indexOf(dot.Volcano_Name) == -1)
+          })
+          .transition()
+          .duration('100')
+          .attr("r", 3)
+          .style("opacity", 0.1);
+  }
 
   // add our function to the list of "region adjust" events (in order to have it be called on each 
   // user adjustment to the region)

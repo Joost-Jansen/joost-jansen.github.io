@@ -7,7 +7,7 @@
   let mapZoom = 150;
   let mapTranslateX = 0;
   let mapTranslateY = 0;
-  const volcanoIconSize = 8;
+  volcanoIconSize = 8;
   const volcanoEruptedColor = "red";
   const volcanoNotEruptedColor = "black";
   let regionSelectMode = true;
