@@ -163,6 +163,10 @@
 
       // call the updateTimeRange function once to correctly color the volcanoes
       updateTimeRange(-Infinity, Infinity);
+      onTimeAdjustEvents.push(() => {
+        let [from, to] = slider.value();
+        updateTimeRange(from.getFullYear(), to.getFullYear());
+      });
     })
   });
   
@@ -208,9 +212,9 @@ isVolcanoInsideRegion = (c, overrideSelection = null) => {
 }
 
 // define what happens when the selection region is adjusted by the user
-brush.on("brush end", (e) => { if (regionSelectMode) update(e.selection); });
+brush.on("brush end", (e) => { if (regionSelectMode) onRegionAdjust(e.selection); });
 
-function update(selection) {
+function onRegionAdjust(selection) {
   
   // Capture zoom-invariant region variables regionMin and regionMax
   regionMin = selection != null
@@ -234,7 +238,7 @@ function update(selection) {
 }
 
 // Call onRegionAdjust once at start up with an empty selection
-update(null);
+onRegionAdjust(null);
 
 // attach brush to regionSelection svg and prevent interaction when regionSelectMode == false
 regionSelection
@@ -247,7 +251,7 @@ regionSelection
   let clearRegionButton = d3.select('#clearRegionButton')
     .on("click", () => {
       brush.clear(regionSelection);
-      update(null);
+      onRegionAdjust(null);
     });
 
   // set up functionality of "select region" button

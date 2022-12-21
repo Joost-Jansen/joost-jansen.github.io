@@ -17,7 +17,6 @@
     };
 
 
-
     d3.csv('data/GVP_Eruption_Results.csv').then((data) => {
 
         /**
@@ -27,13 +26,13 @@
             .domain([new Date(1900, 0, 0), new Date()])
             .range([0, width]);
 
-        var slider = d3.sliderBottom(xScale)
+        slider = d3.sliderBottom(xScale)
             .step(10)
             .displayFormat(d3.timeFormat("%G"))
             .ticks(10)
             .default([new Date(1950, 0, 0), new Date(2000, 0, 0)])
             .fill(palette.orange)
-            .on('onchange', highlightSelection);
+            .on('onchange', onSliderAdjust);
 
         /**
          * yScale
@@ -103,7 +102,7 @@
                 .attr("width", d => x(d.x1) - x(d.x0));
 
             // Highlight the selected bars
-            highlightSelection();
+            onSliderAdjust();
         }
 
         /**
@@ -141,6 +140,12 @@
             var [from, to] = slider.value();
             bars.selectAll("rect")
                 .attr('fill', d => (from <= d.x1 && d.x0 <= to) ? palette.orange : palette.grey);
+        }
+
+        // Called every time the slider is adjusted
+        function onSliderAdjust() {
+            onTimeAdjustEvents.forEach(e => e());
+            highlightSelection();
         }
 
 
