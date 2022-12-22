@@ -7,6 +7,9 @@
     let myColor = d3.scaleOrdinal(d3.schemeCategory10);
     const circleSize = 3
     const circleSizeHover = 5
+    const xDomainLastEruption = [0,2022]
+    const xDomainNumberEruptions = [0,200]
+    const yDomain = [0, 50000000]
 
 // append the svg object to the body of the page
     let scatterSvg = d3.select("#scatterplot")
@@ -23,11 +26,11 @@
         .style("opacity", 0);
 
     let x = d3.scaleLinear()
-        .domain([0, 2023])
+        .domain(xDomainLastEruption)
         .range([0, scatterWidth]);
 
     let y = d3.scaleLinear()
-        .domain([0, 50000000])
+        .domain(yDomain)
         .range([scatterHeight, 0]);
 
     let xAxis = d3.axisBottom(x).ticks(12),
@@ -48,11 +51,11 @@
         .call(xAxis);
 
     // Add x-label
-    scatterSvg.append("text")
+    var xAxisText = scatterSvg.append("text")
         .style("text-anchor", "end")
         .attr("x", scatterWidth)
         .attr("y", scatterHeight + 30)
-        .text("Last eruption year");
+        .text("Last Eruption Year");
 
     // Add y-axis
     scatterSvg.append("g")
@@ -69,7 +72,7 @@
         .text("Population");
 
     // Add titel
-    scatterSvg.append("text")
+    var titel = scatterSvg.append("text")
         .style("text-anchor", "end")
         .style("font-family", "fantasy")
         .attr("x", scatterWidth - 50)
@@ -90,6 +93,7 @@
             'Cone', 'Volcanic field', 'Dome', 'Compound', 'Maar', 'Crater', 'Ring', 'Subglacial']
         var allGroupPopulation = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
         var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km", "100km"])
+        var buttonSelection = ["Last eruption year", "Number of eruptions"]
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
         var dataReady = allGroupPopulation.map(function (grpName) { // .map allows to do something for each element of the list
@@ -102,11 +106,30 @@
                         Country: d.Country,
                         Primary_Volcano_Type: d.Primary_Volcano_Type,
                         Last_Eruption_Year: +d.Last_Eruption_Year,
+                        Number_Of_Eruptions: +d.Number_Of_Erruptions,
                         value: +d[grpName],
                     };
                 })
             };
         });
+
+        // add the options to the button
+        d3.select("#selectButton")
+            .selectAll('myOptions')
+            .data(buttonSelection)
+            .enter()
+            .append('option')
+            .text(function (d) { return d; }) // text showed in the menu
+            .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        d3.select("#selectButton").on("change", function(d) {
+                // recover the option that has been chosen
+                var selectedOption = d3.select(this).property("value")
+                // run the updateChart function with this selected option
+                console.log(selectedOption)
+                updateXaxis(selectedOption)
+            })
+
 
         var brush = d3.brush().extent([[0, 0], [scatterWidth, scatterHeight]]).on("end", function (e) {
                 brushended(e)
@@ -140,7 +163,7 @@
             .enter()
             .append("circle")
             .attr("cx", function (d) {
-                return x(d.Last_Eruption_Year)
+                return (d3.select("#selectButton").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year): x(d.Number_Of_Eruptions) ;
             })
             .attr("cy", function (d) {
                 return y(d.value)
@@ -236,8 +259,16 @@
         function brushended(e) {
             if (!e || !e.selection) {
                 if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
-                x.domain([0, 2023])
-                y.domain([0, 50000000])
+                var type = d3.select("#selectButton").property("value")
+                console.log(type)
+                if (type == "Last eruption year"){
+                    x.domain(xDomainLastEruption)
+                    y.domain(yDomain)
+                }else{
+                    x.domain(xDomainNumberEruptions)
+                    y.domain(yDomain)
+                }
+
             } else {
                 var s = e.selection
                 x.domain([s[0][0], s[1][0]].map(x.invert, x));
@@ -258,11 +289,18 @@
             scatterSvg.select("#axis--y").transition().call(yAxis);
             scatter.selectAll("circle").transition(t)
                 .attr("cx", function (d) {
-                    return x(d.Last_Eruption_Year);
+                    return (d3.select("#selectButton").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year) : x(d.Number_Of_Eruptions) ;
                 })
                 .attr("cy", function (d) {
                     return y(d.value);
                 });
+        }
+
+        function updateXaxis(selection){
+            xAxisText.text(selection)
+            titel.text("Population compared to "+ selection.toLowerCase());
+            brushended(null)
+            brushended(null)
         }
 
         function updateTooltip(e, d, tooltip){
