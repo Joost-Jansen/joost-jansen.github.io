@@ -9,3 +9,4 @@ let volcanoIconSize = undefined;
 // interface for histogram.js
 let onTimeAdjustEvents = [];
 let slider = undefined;
+let selectedVolcanoNumbersHistogram = []

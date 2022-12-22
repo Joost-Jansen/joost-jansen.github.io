@@ -120,55 +120,67 @@
   let updateTimeRange = (min, max) => undefined;
 
   d3.csv(dataPath + "GVP_Volcano_List_old.csv").then(function(volcanoData) {
-    d3.csv(dataPath + "GVP_Eruption_Results.csv").then(function(eruptionData) {
-      
-      // set up eruption and volcano-eruption indices for quick lookup
-      let eruptionIndex = {};
-      let volcanoEruptionIndex = {};
-
-      // fill the volcano-eruption index with empty lists
-      volcanoData.forEach(volcano => {
-        let volcanoId = volcano.Volcano_Number;
-        volcanoEruptionIndex[volcanoId] = [];
-      });
-
-      eruptionData.forEach(eruption => {
-        let volcanoId = eruption["Volcano Number"];
-        let eruptionId = eruption["Eruption Number"];
-        
-        // include in eruption index
-        eruptionIndex[eruptionId] = eruption;
-
-        // include in volcano-eruption index
-        if (volcanoEruptionIndex[volcanoId] != undefined)
-          volcanoEruptionIndex[volcanoId].push(eruptionId);
-      });
+    // d3.csv(dataPath + "GVP_Eruption_Results.csv").then(function(eruptionData) {
+    //
+    //   // set up eruption and volcano-eruption indices for quick lookup
+    //   let eruptionIndex = {};
+    //   let volcanoEruptionIndex = {};
+    //
+    //   // fill the volcano-eruption index with empty lists
+    //   volcanoData.forEach(volcano => {
+    //     let volcanoId = volcano.Volcano_Number;
+    //     volcanoEruptionIndex[volcanoId] = [];
+    //   });
+    //
+    //   eruptionData.forEach(eruption => {
+    //     let volcanoId = eruption["Volcano Number"];
+    //     let eruptionId = eruption["Eruption Number"];
+    //
+    //     // include in eruption index
+    //     eruptionIndex[eruptionId] = eruption;
+    //
+    //     // include in volcano-eruption index
+    //     if (volcanoEruptionIndex[volcanoId] != undefined)
+    //       volcanoEruptionIndex[volcanoId].push(eruptionId);
+    //   });
+    //
+    //   // now that data is prepared, define the time range update function
+    //   updateTimeRange = (min, max) => {
+    //     volcanoes.selectAll("circle")
+    //       .style("fill", d => {
+    //         let eruptions = volcanoEruptionIndex[d.Volcano_Number];
+    //
+    //         let inRange = eruptions.some(eruptionId => {
+    //           let eruption = eruptionIndex[eruptionId];
+    //
+    //           return parseFloat(eruption["Start Year"]) >= min
+    //             && parseFloat(eruption["Start Year"]) <= max
+    //         });
+    //
+    //         return inRange ? volcanoEruptedColor : volcanoNotEruptedColor;
+    //       });
+    //   };
 
       // now that data is prepared, define the time range update function
-      updateTimeRange = (min, max) => {
+      updateTimeRange = (selectedVolcanos) => {
         volcanoes.selectAll("circle")
-          .style("fill", d => {
-            let eruptions = volcanoEruptionIndex[d.Volcano_Number];
-            
-            let inRange = eruptions.some(eruptionId => {
-              let eruption = eruptionIndex[eruptionId];
-              
-              return parseFloat(eruption["Start Year"]) >= min 
-                && parseFloat(eruption["Start Year"]) <= max
+            .style("fill", d => {
+              if (selectedVolcanos.length > 0){
+                return selectedVolcanos.indexOf(d.Volcano_Number)  > 0 ? volcanoEruptedColor : volcanoNotEruptedColor;
+              }else{
+                return volcanoEruptedColor
+              }
             });
-
-            return inRange ? volcanoEruptedColor : volcanoNotEruptedColor;
-          });
       };
 
+
       // call the updateTimeRange function once to correctly color the volcanoes
-      updateTimeRange(-Infinity, Infinity);
+      updateTimeRange([]);
       onTimeAdjustEvents.push(() => {
-        let [from, to] = slider.value();
-        updateTimeRange(from.getFullYear(), to.getFullYear());
+        updateTimeRange(selectedVolcanoNumbersHistogram);
       });
     })
-  });
+  // });
   
     
   // ###############
