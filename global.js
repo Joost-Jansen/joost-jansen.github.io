@@ -10,3 +10,9 @@ let volcanoIconSize = undefined;
 let onTimeAdjustEvents = [];
 let slider = undefined;
 let selectedVolcanoNumbersHistogram = []
+
+// interface for scatter.js
+const circleSize = 3
+const circleSizeHover = 5
+
+

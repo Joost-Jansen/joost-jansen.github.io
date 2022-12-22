@@ -5,11 +5,12 @@
     const scatterHeight = 300 - scatterMargin.top - scatterMargin.bottom;
     // A color scale: one color for each group
     let myColor = d3.scaleOrdinal(d3.schemeCategory10);
-    const circleSize = 3
-    const circleSizeHover = 5
+
     const xDomainLastEruption = [0,2022]
     const xDomainNumberEruptions = [0,200]
-    const yDomain = [0, 50000000]
+    const yDomainTotal = [0, 50000000]
+    const yDomainPerKm = [0, 60000]
+
 
 // append the svg object to the body of the page
     let scatterSvg = d3.select("#scatterplot")
@@ -30,10 +31,10 @@
         .range([0, scatterWidth]);
 
     let y = d3.scaleLinear()
-        .domain(yDomain)
+        .domain(yDomainTotal)
         .range([scatterHeight, 0]);
 
-    let xAxis = d3.axisBottom(x).ticks(12),
+    let xAxis = d3.axisBottom(x).ticks(10).tickFormat(x => x),
         yAxis = d3.axisLeft(y).ticks(12 * scatterHeight / scatterWidth);
 
     let scatterClip = scatterSvg.append("defs").append("svg:clipPath")
@@ -64,7 +65,7 @@
         .call(yAxis);
 
     // Add y-label
-    scatterSvg.append("text")
+    var yAxisText = scatterSvg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 0)
         .attr("dy", "1em")
@@ -75,9 +76,9 @@
     var titel = scatterSvg.append("text")
         .style("text-anchor", "end")
         .style("font-family", "fantasy")
-        .attr("x", scatterWidth - 50)
+        .attr("x", scatterWidth - 40)
         .attr("y", 2)
-        .text("Population compared to last eruption year");
+        .text("Total population compared to last eruption year");
 
     scatter = scatterSvg.append("g")
         .attr("id", "scatterplot")
@@ -91,12 +92,17 @@
         // List of groups (here I have one group per column)
         var allGroupTypes = ['Shield', 'Stratovolcano', 'Caldera', 'Submarine', 'Fissure vent', 'Complex',
             'Cone', 'Volcanic field', 'Dome', 'Compound', 'Maar', 'Crater', 'Ring', 'Subglacial']
-        var allGroupPopulation = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
+        var allGroupPopulationTotal = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
+        var nameDictionary = { "Population_within_5_km":"Population_per_km2_within_5_km",
+                                        "Population_within_10_km":"Population_per_km2_within_10_km",
+                                        "Population_within_30_km":"Population_per_km2_within_30_km",
+                                        "Population_within_100_km":"Population_per_km2_within_100_km"}
         var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km", "100km"])
-        var buttonSelection = ["Last eruption year", "Number of eruptions"]
+        var buttonSelectionX = ["Last eruption year", "Number of eruptions"]
+        var buttonSelectionY = ["Total population", "Population per km2"]
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
-        var dataReady = allGroupPopulation.map(function (grpName) { // .map allows to do something for each element of the list
+        var dataReady = allGroupPopulationTotal.map(function (grpName) { // .map allows to do something for each element of the list
             return {
                 name: grpName,
                 values: data.map(function (d) {
@@ -108,28 +114,43 @@
                         Last_Eruption_Year: +d.Last_Eruption_Year,
                         Number_Of_Eruptions: +d.Number_Of_Erruptions,
                         value: +d[grpName],
+                        value2: +d[nameDictionary[grpName]]
                     };
                 })
             };
         });
 
         // add the options to the button
-        d3.select("#selectButton")
-            .selectAll('myOptions')
-            .data(buttonSelection)
+        d3.select("#selectButtonX")
+            .selectAll('myOptionsX')
+            .data(buttonSelectionX)
             .enter()
             .append('option')
             .text(function (d) { return d; }) // text showed in the menu
             .attr("value", function (d) { return d; }) // corresponding value returned by the button
 
-        d3.select("#selectButton").on("change", function(d) {
+        d3.select("#selectButtonX").on("change", function(d) {
                 // recover the option that has been chosen
-                var selectedOption = d3.select(this).property("value")
-                // run the updateChart function with this selected option
-                console.log(selectedOption)
-                updateXaxis(selectedOption)
+                var selectedOptionX = d3.select(this).property("value")
+                var selectedOptionY = d3.select("#selectButtonY").property("value")
+                updateAxis(selectedOptionX, selectedOptionY)
             })
 
+        // add the options to the button
+        d3.select("#selectButtonY")
+            .selectAll('myOptionsY')
+            .data(buttonSelectionY)
+            .enter()
+            .append('option')
+            .text(function (d) { return d; }) // text showed in the menu
+            .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        d3.select("#selectButtonY").on("change", function(d) {
+                // recover the option that has been chosen
+                var selectedOptionX = d3.select("#selectButtonX").property("value")
+                var selectedOptionY = d3.select(this).property("value")
+                updateAxis(selectedOptionX, selectedOptionY)
+            })
 
         var brush = d3.brush().extent([[0, 0], [scatterWidth, scatterHeight]]).on("end", function (e) {
                 brushended(e)
@@ -163,7 +184,8 @@
             .enter()
             .append("circle")
             .attr("cx", function (d) {
-                return (d3.select("#selectButton").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year): x(d.Number_Of_Eruptions) ;
+                return (d3.select("#selectButtonX").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year): x(d.Number_Of_Eruptions) ;
+                // return  x(d.Last_Eruption_Year);
             })
             .attr("cy", function (d) {
                 return y(d.value)
@@ -196,7 +218,7 @@
                 // hover tooltip
                 updateTooltip(e, d, tooltip)
             })
-            .on('mouseout', function (e, d, i) {
+            .on('mouseleave', function (e, d, i) {
                 // Changes size of circle back
                 d3.select("#scatterplot").selectAll("circle")
                     .filter(function (dot) {
@@ -259,16 +281,10 @@
         function brushended(e) {
             if (!e || !e.selection) {
                 if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
-                var type = d3.select("#selectButton").property("value")
-                console.log(type)
-                if (type == "Last eruption year"){
-                    x.domain(xDomainLastEruption)
-                    y.domain(yDomain)
-                }else{
-                    x.domain(xDomainNumberEruptions)
-                    y.domain(yDomain)
-                }
-
+                var typeX = d3.select("#selectButtonX").property("value")
+                var typeY = d3.select("#selectButtonY").property("value")
+                x.domain( (typeX == "Last eruption year") ? xDomainLastEruption : xDomainNumberEruptions);
+                y.domain((typeY == "Total population") ? yDomainTotal : yDomainPerKm);
             } else {
                 var s = e.selection
                 x.domain([s[0][0], s[1][0]].map(x.invert, x));
@@ -289,19 +305,21 @@
             scatterSvg.select("#axis--y").transition().call(yAxis);
             scatter.selectAll("circle").transition(t)
                 .attr("cx", function (d) {
-                    return (d3.select("#selectButton").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year) : x(d.Number_Of_Eruptions) ;
+                    return (d3.select("#selectButtonX").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year) : x(d.Number_Of_Eruptions) ;
                 })
                 .attr("cy", function (d) {
-                    return y(d.value);
+                    return (d3.select("#selectButtonY").property("value") == "Total population") ? y(d.value) :  y(d.value2);
                 });
         }
 
-        function updateXaxis(selection){
-            xAxisText.text(selection)
-            titel.text("Population compared to "+ selection.toLowerCase());
+        function updateAxis(selectionX, selectionY){
+            xAxisText.text(selectionX)
+            yAxisText.text(selectionY)
+            titel.text(selectionY + " compared to "+ selectionX.toLowerCase());
             brushended(null)
             brushended(null)
         }
+
 
         function updateTooltip(e, d, tooltip){
             if (tooltip.style("opacity") == 0){
