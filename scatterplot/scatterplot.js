@@ -76,7 +76,6 @@
         .attr("y", 2)
         .text("Population compared to last eruption year");
 
-
     scatter = scatterSvg.append("g")
         .attr("id", "scatterplot")
         .attr("clip-path", "url(#clip2)");
@@ -227,15 +226,20 @@
                 d3.select(this).transition().style("cursor", "pointer")
             })
 
-        function brushended(e) {
+        // set up functionality of "zoom out" button
+        let zoomButton = d3.select('#zoomOutButton')
+            .on("click", (e) => {
+                brushended(null)
+                brushended(null)
+            });
 
-            var s = e.selection;
-            if (!s) {
+        function brushended(e) {
+            if (!e || !e.selection) {
                 if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
                 x.domain([0, 2023])
                 y.domain([0, 50000000])
             } else {
-
+                var s = e.selection
                 x.domain([s[0][0], s[1][0]].map(x.invert, x));
                 y.domain([s[1][1], s[0][1]].map(y.invert, y));
                 scatter.select(".brush").call(brush.move, null);
