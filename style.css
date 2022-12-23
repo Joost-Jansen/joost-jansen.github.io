@@ -1,5 +1,32 @@
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 20px;
+    grid-template-columns: [colStart] 75% [colMainDivider] 25% [colEnd];
+    grid-template-rows: [rowStart] 20% [rowMainDivider] 80% [rowEnd];
+    /* grid-gap: 20px; */
+    width: 100%;
+    height: 90vh;
+}
+
+#histogram {
+    grid-column-start: colStart;
+    grid-column-end: colMainDivider;
+    grid-row-start: rowStart;
+    grid-row-end: rowMainDivider;
+    justify-self: stretch;
+}
+
+#scatterplot {
+    grid-column-start: colMainDivider;
+    grid-column-end: colEnd;
+    grid-row-start: rowStart;
+    grid-row-end: rowEnd;
+    justify-self: stretch;
+}
+
+#mapSection {
+    grid-column-start: colStart;
+    grid-column-end: colMainDivider;
+    grid-row-start: rowMainDivider;
+    grid-row-end: rowEnd;
+    justify-self: stretch;
 }

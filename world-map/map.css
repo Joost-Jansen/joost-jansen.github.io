@@ -5,6 +5,12 @@
     margin: -2px;
 }
 
+#buttonSection {
+    position: relative;
+    top: -50px;
+    left: 10px;
+}
+
 #volcanoes circle {
     cursor: pointer;
     fill: gray;

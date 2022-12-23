@@ -9,3 +9,7 @@ let volcanoIconSize = undefined;
 // interface for histogram.js
 let onTimeAdjustEvents = [];
 let slider = undefined;
+
+// util functions
+let getWidth = (el) => parseInt(el.node().clientWidth);
+let getHeight = (el) => parseInt(el.node().clientHeight);

@@ -1,8 +1,6 @@
 // @ts-check
 {
   const dataPath = "../data/";
-  const mapWidth = 800;
-  const mapHeight = 400;
   const mapZoomfactor = 0.0002;
   let mapZoom = 150;
   let mapTranslateX = 0;
@@ -14,11 +12,10 @@
   let regionMin = [0, 0];
   let regionMax = [0, 0];
 
-  let mapSvg = d3.select('#worldMap')
-    .append("svg")
-    .attr("width", mapWidth)
-    .attr("height", mapHeight)
-    .attr("id", "mapSvg");
+  let mapSvg = d3.select('#mapSvg');
+
+  let getMapWidth = () => getWidth(mapSvg);
+  let getMapHeight = () => getHeight(mapSvg);
 
   let countries = mapSvg.append("g")
     .attr("id", "countries");
@@ -30,7 +27,7 @@
   let projection = d3.geoMercator()
     .center([2, 47]) // GPS of location to zoom on
     .scale(mapZoom)
-    .translate([ mapWidth / 2, mapHeight / 2 ]);
+    .translate([ getMapWidth() / 2, getMapHeight() / 2 ]);
   
   let brush = d3.brush()
     .extent([[-1e5, -1e5], [1e5, 1e5]]);
@@ -74,7 +71,7 @@
   function updateMapView() {
     projection
       .scale(mapZoom)
-      .translate([mapWidth / 2 + mapTranslateX * mapZoom, mapHeight / 2 + mapTranslateY * mapZoom]);
+      .translate([getMapWidth() / 2 + mapTranslateX * mapZoom, getMapHeight() / 2 + mapTranslateY * mapZoom]);
     
     // redraw countries
     countries.selectAll("path")
@@ -89,17 +86,17 @@
 
     // reposition region selection
     brush
-      .move(regionSelection, [[mapWidth / 2 + (regionMin[0] + mapTranslateX) * mapZoom, 
-                              mapHeight / 2 + (regionMin[1] + mapTranslateY) * mapZoom], 
-                             [mapWidth / 2 + (regionMax[0] + mapTranslateX) * mapZoom, 
-                              mapHeight / 2 + (regionMax[1] + mapTranslateY) * mapZoom]])
+      .move(regionSelection, [[getMapWidth() / 2 + (regionMin[0] + mapTranslateX) * mapZoom, 
+                              getMapHeight() / 2 + (regionMin[1] + mapTranslateY) * mapZoom], 
+                             [getMapWidth() / 2 + (regionMax[0] + mapTranslateX) * mapZoom, 
+                              getMapHeight() / 2 + (regionMax[1] + mapTranslateY) * mapZoom]])
   }
 
   // set up zoom input
   mapSvg.on("wheel", (e) => {
     mapZoom = mapZoom ** (1 - e.deltaY * mapZoomfactor);
     updateMapView();
-    return false;
+    e.preventDefault();
   });
 
   // set up mouse drag input
@@ -218,12 +215,12 @@ function onRegionAdjust(selection) {
   
   // Capture zoom-invariant region variables regionMin and regionMax
   regionMin = selection != null
-    ? [(selection[0][0] - mapWidth / 2) / mapZoom - mapTranslateX, 
-        (selection[0][1] - mapHeight / 2) / mapZoom - mapTranslateY]
+    ? [(selection[0][0] - getMapWidth() / 2) / mapZoom - mapTranslateX, 
+        (selection[0][1] - getMapHeight() / 2) / mapZoom - mapTranslateY]
     : [0, 0];
   regionMax = selection != null
-    ? [(selection[1][0] - mapWidth / 2) / mapZoom - mapTranslateX, 
-      (selection[1][1] - mapHeight / 2) / mapZoom - mapTranslateY]
+    ? [(selection[1][0] - getMapWidth() / 2) / mapZoom - mapTranslateX, 
+      (selection[1][1] - getMapHeight() / 2) / mapZoom - mapTranslateY]
     : [0, 0];
 
   // Adjust circle opacity based on selection

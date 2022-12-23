@@ -1,18 +1,19 @@
 // @ts-check
 {
     const scatterMargin = {top: 20, right: 10, bottom: 50, left: 65}
-    const scatterWidth = 450 - scatterMargin.left - scatterMargin.right
-    const scatterHeight = 300 - scatterMargin.top - scatterMargin.bottom;
+
     // A color scale: one color for each group
     let myColor = d3.scaleOrdinal(d3.schemeCategory10);
     const circleSize = 3
     const circleSizeHover = 5
 
-// append the svg object to the body of the page
-    let scatterSvg = d3.select("#scatterplot")
-        .append("svg")
-        .attr("width", scatterWidth + scatterMargin.left + scatterMargin.right)
-        .attr("height", scatterHeight + scatterMargin.top + scatterMargin.bottom)
+    // append the svg object to the body of the page
+    let scatterSvgElement = d3.select("#scatterplotSvg")
+        
+    let getScatterWidth = () => getWidth(scatterSvgElement) - scatterMargin.left - scatterMargin.right;
+    let getScatterHeight = () => getHeight(scatterSvgElement) - scatterMargin.top - scatterMargin.bottom;
+
+    let scatterSvg = scatterSvgElement
         .append("g")
         .attr("transform",
             "translate(" + scatterMargin.left + "," + scatterMargin.top + ")");
@@ -24,34 +25,34 @@
 
     let x = d3.scaleLinear()
         .domain([0, 2023])
-        .range([0, scatterWidth]);
+        .range([0, getScatterWidth()]);
 
     let y = d3.scaleLinear()
         .domain([0, 50000000])
-        .range([scatterHeight, 0]);
+        .range([getScatterHeight(), 0]);
 
     let xAxis = d3.axisBottom(x).ticks(12),
-        yAxis = d3.axisLeft(y).ticks(12 * scatterHeight / scatterWidth);
+        yAxis = d3.axisLeft(y).ticks(12 * getScatterHeight() / getScatterWidth());
 
     let scatterClip = scatterSvg.append("defs").append("svg:clipPath")
         .attr("id", "clip2")
         .append("svg:rect")
-        .attr("width", scatterWidth)
-        .attr("height", scatterHeight)
+        .attr("width", getScatterWidth())
+        .attr("height", getScatterHeight())
         .attr("x", 0)
         .attr("y", 0);
     // Add x-axis
     scatterSvg.append("g")
         .attr("class", "x axis")
         .attr('id', "axis--x")
-        .attr("transform", "translate(0," + scatterHeight + ")")
+        .attr("transform", "translate(0," + getScatterHeight() + ")")
         .call(xAxis);
 
     // Add x-label
     scatterSvg.append("text")
         .style("text-anchor", "end")
-        .attr("x", scatterWidth)
-        .attr("y", scatterHeight + 30)
+        .attr("x", getScatterWidth())
+        .attr("y", getScatterHeight() + 30)
         .text("Last eruption year");
 
     // Add y-axis
@@ -68,11 +69,11 @@
         .style("text-anchor", "end")
         .text("Population");
 
-    // Add titel
+    // Add title
     scatterSvg.append("text")
         .style("text-anchor", "end")
         .style("font-family", "fantasy")
-        .attr("x", scatterWidth - 50)
+        .attr("x", getScatterWidth() - 50)
         .attr("y", 2)
         .text("Population compared to last eruption year");
 
@@ -109,7 +110,8 @@
             };
         });
 
-        var brush = d3.brush().extent([[0, 0], [scatterWidth, scatterHeight]]).on("end", function (e) {
+        var brush = d3.brush().extent([[0, 0], [getScatterWidth(), getScatterHeight()]])
+            .on("end", function (e) {
                 brushended(e)
             }),
             idleTimeout,
@@ -205,7 +207,7 @@
             .attr('x', function (d, i) {
                 return i * 50
             })
-            .attr('y', scatterHeight + 40)
+            .attr('y', getScatterHeight() + 40)
             .text(function (d) {
                 return prettyNamesPopulation(d.name);
             })
@@ -215,8 +217,8 @@
             .style("font-size", 15)
             .on("click", function (e, d) {
                 // is the element currently visible ?
-                currentOpacity = d3.selectAll("." + d.name).style("opacity")
-                currentOpacityText = d3.select(this).style("opacity");
+                var currentOpacity = parseFloat(d3.selectAll("." + d.name).style("opacity"));
+                var currentOpacityText = parseFloat(d3.select(this).style("opacity"));
                 // Change the opacity: from 0 to 1 or from 1 to 0
 
                 d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0.1 : 1)
