@@ -25,7 +25,7 @@
     .attr("id", "volcanoes");
 
   let projection = d3.geoMercator()
-    .center([2, 47]) // GPS of location to zoom on
+    .center([0, 0]) // GPS of location to zoom on
     .scale(mapZoom)
     .translate([ getMapWidth() / 2, getMapHeight() / 2 ]);
   
@@ -38,7 +38,11 @@
   // #####################################
 
   // populate svg with countries using the loaded geoData
-  d3.json(dataPath + "custom.geo.json").then(function(geoData) {
+  d3.json(dataPath + "countries-110m.json").then(function(topoData) {
+
+    // @ts-ignore
+    let geoData = topojson.feature(topoData, topoData.objects.countries);
+
     countries.selectAll("path") // @ts-ignore
       .data(geoData.features)
       .enter()
@@ -226,7 +230,7 @@ function onRegionAdjust(selection) {
   // Adjust circle opacity based on selection
   volcanoes.selectAll("circle")
     .each((_, i, circles) => {
-      let c = d3.select(circles[i]);
+      let c = d3.select(circles[i]); // @ts-ignore
       c.style("fill-opacity", isVolcanoInsideRegion(c, selection) ? 0.5 : 0);
     });
   

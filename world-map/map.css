@@ -1,8 +1,5 @@
 #mapSvg {
-    cursor: move; 
-    border: 2px; 
-    border-style: solid; 
-    margin: -2px;
+    cursor: move;
 }
 
 #buttonSection {
