@@ -1,6 +1,6 @@
 // @ts-check
 {
-    var margin = {top: 30, right: 60, bottom: 50, left: 30}
+    var margin = {top: 10, right: 30, bottom: 45, left: 20}
 
     var histogramSvgElement = d3.select("#histogramSvg");
     
@@ -13,7 +13,7 @@
 
     var palette = {
         grey: "#e1e1e1",
-        orange: "#fcab71",
+        red: "#ee0000",
     };
 
     d3.csv('data/GVP_Eruption_Results.csv').then((data) => {
@@ -30,7 +30,7 @@
             .displayFormat(d3.timeFormat("%G"))
             .ticks(10)
             .default([new Date(1950, 0, 0), new Date(2000, 0, 0)])
-            .fill(palette.orange)
+            .fill(palette.red)
             .on('onchange', onSliderAdjust);
 
         /**
@@ -138,7 +138,7 @@
         function highlightSelection() {
             var [from, to] = slider.value();
             bars.selectAll("rect")
-                .attr('fill', d => (from <= d.x1 && d.x0 <= to) ? palette.orange : palette.grey);
+                .attr('fill', d => (from <= d.x1 && d.x0 <= to) ? palette.red : palette.grey);
         }
 
         // Called every time the slider is adjusted

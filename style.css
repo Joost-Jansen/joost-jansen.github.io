@@ -1,8 +1,9 @@
 .grid-container {
     display: grid;
-    grid-template-columns: [colStart] 3fr [colMainDivider] 1fr [colEnd];
+    grid-template-columns: [colStart] 5fr [colMainDivider] 2fr [colEnd];
     grid-template-rows: [rowStart] 1fr [rowMainDivider] 4fr [rowEnd];
-    grid-gap: 20px;
+    column-gap: 20px;
+    row-gap: 5px;
     width: 100%;
     height: 95vh;
 }
