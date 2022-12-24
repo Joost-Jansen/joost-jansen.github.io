@@ -63,13 +63,56 @@
           .attr("cx", d => projection([d.Longitude, d.Latitude])[0])
           .attr("cy", d => projection([d.Longitude, d.Latitude])[1])
           .attr("r", volcanoIconSize);
-      
-      // set up tooltip (can only be done after volcanoes are loaded)
-      setupTooltip();
 
-      // call onMapReady events
+      // ###############
+      // ### TOOLTIP ###
+      // ###############
+
+      // add tooltip functionality
+      setupTooltipHover()
+
+    // call onMapReady events
       onMapReadyEvents.forEach(e => e());
   });
+
+    function setupTooltipHover(){
+        let tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip");
+
+        // add tooltip functionality
+        volcanoes.selectAll("circle").on("mouseover", function  (e, d) {
+            tooltip.transition()
+                .duration(100)
+                .style("opacity",  1);
+            tooltip.html("Volcano Name: " + d.Volcano_Name + "<br>" +
+                "Volcano Type: " + d.Primary_Volcano_Type + "<br>" +
+                "Eruption Year: " + d.Last_Eruption_Year + "<br>" +
+                "Population 100km: " + d3.format(",")(d.Population_within_100_km))
+                .style("left", (e.pageX + 10) + "px")
+                .style("top", (e.pageY) + "px");
+
+            scatter.selectAll("circle")
+                .filter(function (dot) {
+                    return (dot.Volcano_Number == d.Volcano_Number)
+                })
+                .transition()
+                .duration('100')
+                .attr("r", circleSizeHover);
+        })
+            .on("mouseleave", function (e, d) {
+                tooltip.transition()
+                .duration(100)
+                .style("opacity",  0);
+
+                scatter.selectAll("circle")
+                    .filter(function (dot) {
+                        return (dot.Volcano_Number == d.Volcano_Number)
+                    })
+                    .transition()
+                    .duration('100')
+                    .attr("r", circleSize);
+            })
+    }
 
   // map update function for when projection changes
   function updateMapView() {
@@ -121,80 +164,26 @@
   let updateTimeRange = (min, max) => undefined;
 
   d3.csv(dataPath + "GVP_Volcano_List_old.csv").then(function(volcanoData) {
-    d3.csv(dataPath + "GVP_Eruption_Results.csv").then(function(eruptionData) {
-      
-      // set up eruption and volcano-eruption indices for quick lookup
-      let eruptionIndex = {};
-      let volcanoEruptionIndex = {};
-
-      // fill the volcano-eruption index with empty lists
-      volcanoData.forEach(volcano => {
-        let volcanoId = volcano.Volcano_Number;
-        volcanoEruptionIndex[volcanoId] = [];
-      });
-
-      eruptionData.forEach(eruption => {
-        let volcanoId = eruption["Volcano Number"];
-        let eruptionId = eruption["Eruption Number"];
-        
-        // include in eruption index
-        eruptionIndex[eruptionId] = eruption;
-
-        // include in volcano-eruption index
-        if (volcanoEruptionIndex[volcanoId] != undefined)
-          volcanoEruptionIndex[volcanoId].push(eruptionId);
-      });
-
       // now that data is prepared, define the time range update function
-      updateTimeRange = (min, max) => {
+      updateTimeRange = (selectedVolcanos) => {
         volcanoes.selectAll("circle")
-          .style("fill", d => {
-            let eruptions = volcanoEruptionIndex[d.Volcano_Number];
-            
-            let inRange = eruptions.some(eruptionId => {
-              let eruption = eruptionIndex[eruptionId];
-              
-              return parseFloat(eruption["Start Year"]) >= min 
-                && parseFloat(eruption["Start Year"]) <= max
+            .style("fill", d => {
+              if (selectedVolcanos.length > 0){
+                return selectedVolcanos.indexOf(d.Volcano_Number)  > 0 ? volcanoEruptedColor : volcanoNotEruptedColor;
+              }else{
+                return volcanoEruptedColor
+              }
             });
-
-            return inRange ? volcanoEruptedColor : volcanoNotEruptedColor;
-          });
       };
 
+
       // call the updateTimeRange function once to correctly color the volcanoes
-      updateTimeRange(-Infinity, Infinity);
+      updateTimeRange([]);
       onTimeAdjustEvents.push(() => {
-        let [from, to] = slider.value();
-        updateTimeRange(from.getFullYear(), to.getFullYear());
+        updateTimeRange(selectedVolcanoNumbersHistogram);
       });
     })
-  });
-  
-    
-  // ###############
-  // ### TOOLTIP ###
-  // ###############
 
-  // add tooltip functionality
-  function setupTooltip() {
-    
-    // create tooltip div
-    let tooltip = d3.select("#worldMap")
-      .append("div")
-      .attr("id", "tooltip");
-    
-    // add mouse interaction to volcanoes
-    volcanoes.selectAll("circle")
-      .on("mouseover", () => tooltip.style("opacity", 1))
-      .on("mouseleave", () => tooltip.style("opacity", 0))
-      .on("mousemove", (e, d) => {
-        tooltip.html(d.Volcano_Name + "<br>" + "Longitude: " + d.Longitude + "<br>" + 
-                    "Latitude: " + d.Latitude + "<br>Last eruption year: " + d.Last_Eruption_Year)
-        .style("left", (e.pageX+10) + "px")
-        .style("top", e.pageY + "px");
-      });
-    }
 
     
 // ########################

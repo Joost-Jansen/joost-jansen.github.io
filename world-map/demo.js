@@ -20,30 +20,20 @@
       .selectAll("circle")
       .each((d, i, circles) => {
         let c = d3.select(circles[i]);
-        if (isVolcanoInsideRegion(c))
-          selectedVolcanoNames.push(d.Volcano_Name);
+        if (isVolcanoInsideRegion(c) && selectedVolcanoNumbersHistogram.indexOf(d.Volcano_Number))
+          selectedVolcanoNames.push(d.Volcano_Number);
       });
     updateScatterplot(selectedVolcanoNames, [])
 }
 
   function updateScatterplot(selectedVolcanoNames, hoverVolcanoNames){
       scatter.selectAll("circle")
-          .filter(function (dot) {
-              return ( selectedVolcanoNames.indexOf(dot.Volcano_Name) != -1)
-          })
           .transition()
           .duration('100')
           .attr("r", 3)
-          .style("opacity", 1);
-
-      scatter.selectAll("circle")
-          .filter(function (dot) {
-              return ( selectedVolcanoNames.indexOf(dot.Volcano_Name) == -1)
-          })
-          .transition()
-          .duration('100')
-          .attr("r", 3)
-          .style("opacity", 0.1);
+          .style("opacity", function (dot) {
+              return (selectedVolcanoNames.indexOf(dot.Volcano_Number) > 0) ? 1 : 0.1
+          });
   }
 
   // add our function to the list of "region adjust" events (in order to have it be called on each 

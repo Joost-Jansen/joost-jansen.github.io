@@ -143,6 +143,15 @@
 
         // Called every time the slider is adjusted
         function onSliderAdjust() {
+            var [from, to] = slider.value();
+            selectedVolcanoNumbersHistogram = [...new Set(data
+                .filter(function (d) {
+                        return parseInt(d["Start Year"]) >= from.getFullYear() && parseInt(d["Start Year"]) <= to.getFullYear()
+                    }
+                ).map(function (d) {
+                    return d["Volcano Number"]
+                }))]
+
             onTimeAdjustEvents.forEach(e => e());
             highlightSelection();
         }

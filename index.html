@@ -12,6 +12,7 @@
     <script src="histogram/histogram.js" defer ></script>
     <script src='/scatterplot/scatterplot.js' defer></script>
     <link rel="stylesheet" href="/scatterplot/scatterplot.css">
+    <link rel="stylesheet" href="global.css">
     <script src="/world-map/map.js" defer></script>
     <link rel="stylesheet" href="/world-map/map.css">
     <link rel="stylesheet" href="style.css">
@@ -33,6 +34,9 @@
         </div>
         <div id="scatterplot">
             <svg id="scatterplotSvg" width="100%", height="100%"></svg>
+            <button type="button" class="scatterplotButton" id="zoomOutButton">reset zoom</button>
+            <select id="selectButtonX"></select>
+            <select id="selectButtonY"></select>
         </div>
     </div>
 </body>
