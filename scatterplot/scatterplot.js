@@ -19,13 +19,9 @@
 
     let scatterSvg = scatterSvgElement
         .append("g")
+        .attr("id", "scatterPoints")
         .attr("transform",
             "translate(" + scatterMargin.left + "," + scatterMargin.top + ")");
-
-    // hover at plot
-    let tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
 
     let x = d3.scaleLinear()
         .domain(xDomainLastEruption)
@@ -73,10 +69,10 @@
         .style("text-anchor", "end")
         .text("Population");
         
-    // Add titel
+    // Add title
     var titel = scatterSvg.append("text")
         .style("text-anchor", "end")
-        .style("font-family", "fantasy")
+        .style("font-size", "20px")
         .attr("x", getScatterWidth() - 40)
         .attr("y", 2)
         .text("Total population compared to last eruption year");
@@ -191,54 +187,15 @@
             .attr("cy", function (d) {
                 return y(d.value)
             })
-            .attr("r", 3)
+            .attr("r", scatterCircleSize)
             .attr("stroke", "white")
-            .attr("pointer-events", "all")
-            // to color on volcano type
-            // .style("fill", function(d){ return myColor2(d.Primary_Volcano_Type) })
-            .on('mouseover', function (e, d) {
-                // Changes cursor
-                d3.select(this).transition().style("cursor", "pointer")
-                // Changes size of circle
-                d3.select("#scatterplot").selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", circleSizeHover);
+            .attr("pointer-events", "all");
 
-                volcanoes.selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", 20)
-
-                // hover tooltip
-                updateTooltip(e, d, tooltip)
-            })
-            .on('mouseleave', function (e, d, i) {
-                // Changes size of circle back
-                d3.select("#scatterplot").selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    }).transition()
-                    .duration('200')
-                    .attr("r", circleSize);
-
-
-                volcanoes.selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", volcanoIconSize);
-
-                updateTooltip(e, d, tooltip)
-            });
+        resizeScatterPoint = (sp, size) => {
+            sp.transition()
+                .duration(100)
+                .attr("r", size);        
+        }
 
         // Add a legend (interactive)
         scatterSvg
@@ -321,24 +278,6 @@
             brushended(null)
         }
 
-
-        function updateTooltip(e, d, tooltip){
-            if (tooltip.style("opacity") == 0){
-                tooltip.transition()
-                    .duration(100)
-                    .style("opacity", 1);
-                tooltip.html("Volcano Name: " + d.Volcano_Name + "<br>" +
-                    "Volcano Type: " + d.Primary_Volcano_Type + "<br>" +
-                    "Eruption Year: " + d.Last_Eruption_Year + "<br>" +
-                    "Population: " + d3.format(",")(d.value))
-                    .style("left", (e.pageX + 10) + "px")
-                    .style("top", (e.pageY) + "px");
-
-            } else{
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", 0);
-            }
-        }
+        setScatterReady();
     })
 };

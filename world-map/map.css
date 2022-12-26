@@ -2,7 +2,7 @@
     cursor: move;
 }
 
-#buttonSection {
+#mapButtonSection {
     position: relative;
     top: -50px;
     left: 10px;
@@ -12,16 +12,6 @@
     cursor: pointer;
     fill: gray;
     fill-opacity: 0.5;
-    stroke: rgb(0, 0, 0);
+    stroke: black;
     stroke-width: 1px;
-}
-
-#volcanoes circle:hover {
-    fill-opacity: 1;
-    stroke: white;
-}
-
-.mapButton {
-    padding: 5px;
-    cursor: pointer;
 }

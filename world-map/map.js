@@ -6,11 +6,14 @@
   let mapTranslateX = 0;
   let mapTranslateY = 0;
   volcanoIconSize = 8;
+  volcanoIconSizeHover = 12;
   const volcanoEruptedColor = "red";
   const volcanoNotEruptedColor = "black";
   let regionSelectMode = true;
   let regionMin = [0, 0];
   let regionMax = [0, 0];
+  const countryFill = "rgb(230, 230, 230)";
+  const countryStroke = "rgb(125, 125, 125)";
 
   let mapSvg = d3.select('#mapSvg');
 
@@ -47,11 +50,11 @@
       .data(geoData.features)
       .enter()
       .append("path")
-      .attr("fill", "#d8d8d8")
+      .attr("fill", countryFill)
       .attr("d", d3.geoPath()
           .projection(projection)
       )
-      .style("stroke", "#606060");
+      .style("stroke", countryStroke);
   });
 
   // populate svg with volcanoes
@@ -64,55 +67,12 @@
           .attr("cy", d => projection([d.Longitude, d.Latitude])[1])
           .attr("r", volcanoIconSize);
 
-      // ###############
-      // ### TOOLTIP ###
-      // ###############
+      // ready for tooltip and highlighting functionality
+      setMapReady();
 
-      // add tooltip functionality
-      setupTooltipHover()
-
-    // call onMapReady events
+      // call onMapReady events
       onMapReadyEvents.forEach(e => e());
-  });
-
-    function setupTooltipHover(){
-        let tooltip = d3.select("body").append("div")
-            .attr("class", "tooltip");
-
-        // add tooltip functionality
-        volcanoes.selectAll("circle").on("mouseover", function  (e, d) {
-            tooltip.transition()
-                .duration(100)
-                .style("opacity",  1);
-            tooltip.html("Volcano Name: " + d.Volcano_Name + "<br>" +
-                "Volcano Type: " + d.Primary_Volcano_Type + "<br>" +
-                "Eruption Year: " + d.Last_Eruption_Year + "<br>" +
-                "Population 100km: " + d3.format(",")(d.Population_within_100_km))
-                .style("left", (e.pageX + 10) + "px")
-                .style("top", (e.pageY) + "px");
-
-            scatter.selectAll("circle")
-                .filter(function (dot) {
-                    return (dot.Volcano_Number == d.Volcano_Number)
-                })
-                .transition()
-                .duration('100')
-                .attr("r", circleSizeHover);
-        })
-            .on("mouseleave", function (e, d) {
-                tooltip.transition()
-                .duration(100)
-                .style("opacity",  0);
-
-                scatter.selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", circleSize);
-            })
-    }
+  });    
 
   // map update function for when projection changes
   function updateMapView() {
@@ -186,56 +146,60 @@
 
 
     
-// ########################
-// ### REGION SELECTION ###
-// ########################
+  // ########################
+  // ### REGION SELECTION ###
+  // ########################
 
-// utility function to check if a volcano circle is inside the selection region
-isVolcanoInsideRegion = (c, overrideSelection = null) => {
-  let selection = overrideSelection != null 
-    ? overrideSelection
-    : d3.brushSelection(regionSelection.node());
+  // utility function to check if a volcano circle is inside the selection region
+  isVolcanoInsideRegion = (c, overrideSelection = undefined) => {
+    let selection = overrideSelection != undefined 
+      ? overrideSelection
+      : d3.brushSelection(regionSelection.node());
 
-  return selection == null                                                // if selection is null
-    || c.attr("cx") >= selection[0][0] && c.attr("cy") >= selection[0][1] // or circle inside
-    && c.attr("cx") <= selection[1][0] && c.attr("cy") <= selection[1][1];
-}
+    let eps = 1e-5;
 
-// define what happens when the selection region is adjusted by the user
-brush.on("brush end", (e) => { if (regionSelectMode) onRegionAdjust(e.selection); });
+    return selection == null                                                // if selection is null
+      || selection[1][0] - selection[0][0] < eps                            // if selection is small
+      && selection[1][1] - selection[0][1] < eps
+      || c.attr("cx") >= selection[0][0] && c.attr("cy") >= selection[0][1] // or circle inside
+      && c.attr("cx") <= selection[1][0] && c.attr("cy") <= selection[1][1];
+  }
 
-function onRegionAdjust(selection) {
-  
-  // Capture zoom-invariant region variables regionMin and regionMax
-  regionMin = selection != null
-    ? [(selection[0][0] - getMapWidth() / 2) / mapZoom - mapTranslateX, 
-        (selection[0][1] - getMapHeight() / 2) / mapZoom - mapTranslateY]
-    : [0, 0];
-  regionMax = selection != null
-    ? [(selection[1][0] - getMapWidth() / 2) / mapZoom - mapTranslateX, 
-      (selection[1][1] - getMapHeight() / 2) / mapZoom - mapTranslateY]
-    : [0, 0];
+  // define what happens when the selection region is adjusted by the user
+  brush.on("brush end", (e) => { if (regionSelectMode) onRegionAdjust(e.selection); });
 
-  // Adjust circle opacity based on selection
-  volcanoes.selectAll("circle")
-    .each((_, i, circles) => {
-      let c = d3.select(circles[i]); // @ts-ignore
-      c.style("fill-opacity", isVolcanoInsideRegion(c, selection) ? 0.5 : 0);
-    });
-  
-  // Call other events
-  onRegionAdjustEvents.forEach(e => e());
-}
+  function onRegionAdjust(selection) {
+    
+    // Capture zoom-invariant region variables regionMin and regionMax
+    regionMin = selection != null
+      ? [(selection[0][0] - getMapWidth() / 2) / mapZoom - mapTranslateX, 
+          (selection[0][1] - getMapHeight() / 2) / mapZoom - mapTranslateY]
+      : [0, 0];
+    regionMax = selection != null
+      ? [(selection[1][0] - getMapWidth() / 2) / mapZoom - mapTranslateX, 
+        (selection[1][1] - getMapHeight() / 2) / mapZoom - mapTranslateY]
+      : [0, 0];
 
-// Call onRegionAdjust once at start up with an empty selection
-onRegionAdjust(null);
+    // Adjust circle opacity based on selection
+    volcanoes.selectAll("circle")
+      .each((_, i, circles) => {
+        let c = d3.select(circles[i]); // @ts-ignore
+        c.style("fill-opacity", isVolcanoInsideRegion(c, selection) ? 0.5 : 0);
+      });
+    
+    // Call other events
+    onRegionAdjustEvents.forEach(e => e());
+  }
 
-// attach brush to regionSelection svg and prevent interaction when regionSelectMode == false
-regionSelection
-  .on("mousedown mousemove mouseover mouseleave", (e) => {
-      if (!regionSelectMode) e.stopPropagation();
-    }, true)
-  .call(brush);
+  // Call onRegionAdjust once at start up with an empty selection
+  onRegionAdjust(null);
+
+  // attach brush to regionSelection svg and prevent interaction when regionSelectMode == false
+  regionSelection
+    .on("mousedown mousemove mouseover mouseleave", (e) => {
+        if (!regionSelectMode) e.stopPropagation();
+      }, true)
+    .call(brush);
 
   // set up functionality of "clear region" button
   let clearRegionButton = d3.select('#clearRegionButton')
@@ -267,4 +231,32 @@ regionSelection
   // call this function once at the start (assuming regionSelectMode == true) to set cursors 
   // correctly.
   selectRegionButtonOnClick();
+
+
+    
+  // ############################
+  // ### VOLCANO HIGHLIGHTING ###
+  // ############################
+  
+  highlightMapVolcano = v => {
+    if (isVolcanoInsideRegion(v)) {
+      v.style("fill-opacity", 1)
+        .style("stroke", "rgb(220, 220, 220)")
+        .style("stroke-width", "2px");
+    } 
+    v.transition()
+      .duration(100)
+      .attr("r", volcanoIconSizeHover);
+
+    v.node().parentNode.insertBefore(v.node(), null); // move volcano to the forefront in the svg
+  };
+  
+  removeHighlightMapVolcano = v => {
+    if (isVolcanoInsideRegion(v)) v.style("fill-opacity", 0.5)
+    v.style("stroke", "black")
+    .style("stroke-width", "1px")
+    .transition()
+    .duration(100)
+    .attr("r", volcanoIconSize);
+  };
 }

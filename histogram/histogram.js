@@ -13,7 +13,7 @@
 
     var palette = {
         grey: "#e1e1e1",
-        red: "#ee0000",
+        red: "#e03030",
     };
 
     d3.csv('data/GVP_Eruption_Results.csv').then((data) => {
