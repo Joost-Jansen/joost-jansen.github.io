@@ -188,7 +188,6 @@
                 return y(d.value)
             })
             .attr("r", scatterCircleSize)
-            .attr("stroke", "white")
             .attr("pointer-events", "all");
 
         resizeScatterPoint = (sp, size) => {
@@ -279,5 +278,25 @@
         }
 
         setScatterReady();
-    })
+    });
+
+    function changeOpacityOnRegionSelect(){
+        volcanoes
+            .selectAll("circle")
+            .each((d, i, circles) => {
+                let c = d3.select(circles[i]);
+                let sps = scatterVolcanoIndex[d.Volcano_Number]
+                if (sps != undefined) sps.forEach(sp => {
+                    sp.transition()
+                        .duration(100)
+                        .style("display", _ => {
+                            return isVolcanoInsideRegion(c) ? "block" : "none"
+                        });
+                        
+                });
+            });
+    }
+
+    onRegionAdjustEvents.push(changeOpacityOnRegionSelect);
+    onMapReadyEvents.push(changeOpacityOnRegionSelect);
 };

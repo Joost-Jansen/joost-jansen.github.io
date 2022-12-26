@@ -26,6 +26,8 @@
     .attr("id", "regionSelection");
   volcanoes = mapSvg.append("g")
     .attr("id", "volcanoes");
+  let legend = mapSvg.append("g")
+    .attr("id", "legend");
 
   let projection = d3.geoMercator()
     .center([0, 0]) // GPS of location to zoom on
@@ -259,4 +261,43 @@
     .duration(100)
     .attr("r", volcanoIconSize);
   };
+
+
+
+  // #########################
+  // ### SIMPLE MAP LEGEND ###
+  // #########################
+
+  const rectWidth = 20,
+    rectHeight = 10,
+    margin = 10,
+    xOffset = 20,
+    yOffset = 100,
+    fontSize = "12px";
+
+  let volcanoNotEruptedRect = legend
+    .append("rect")
+    .attr("width", rectWidth)
+    .attr("height", rectHeight)
+    .attr("x", xOffset)
+    .attr("y", getMapHeight() - yOffset)
+    .style("stroke", "black")
+    .style("fill", "black")
+    .style("fill-opacity", 0.5);
+
+  let volcanoNotEruptedText = legend
+    .append("text")
+    .attr("x", xOffset + rectWidth + margin)
+    .attr("y", getMapHeight() - yOffset + rectHeight)
+    .text("Erupted")
+    .style("font-size", fontSize)
+    .attr("alignment-baseline", "middle");
+
+  volcanoNotEruptedRect.clone()
+    .attr("y", getMapHeight() - yOffset + rectHeight + margin)
+    .style("fill", "red");
+
+  volcanoNotEruptedText.clone()
+    .attr("y", getMapHeight() - yOffset + 2 * rectHeight + margin)
+    .text("Not erupted")
 }

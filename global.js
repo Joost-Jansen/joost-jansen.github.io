@@ -19,9 +19,10 @@ const scatterCircleSize = 4
 const scatterCircleSizeHover = 8
 let resizeScatterPoint = (sp, size) => undefined;
 
-// util functions
+// util
 let getWidth = el => parseInt(el.node().clientWidth);
 let getHeight = el => parseInt(el.node().clientHeight);
+let scatterVolcanoIndex = {};
 
 
 
@@ -53,7 +54,7 @@ function setupTooltipAndHighlighting() {
             mapVolcanoIndex[d.Volcano_Number] = v;
         });
 
-    let scatterVolcanoIndex = {}
+    scatterVolcanoIndex = {}
     scatter.selectAll("circle")
         .each((d, i, circles) => {
             let sp = d3.select(circles[i]);
