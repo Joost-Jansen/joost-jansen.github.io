@@ -8,6 +8,7 @@
 
     const xDomainLastEruption = [0,2022]
     const xDomainNumberEruptions = [0,200]
+    const xElevation = [-4000,7000]
     const yDomainTotal = [0, 50000000]
     const yDomainPerKm = [0, 60000]
 
@@ -98,7 +99,7 @@
                                         "Population_within_30_km":"Population_per_km2_within_30_km",
                                         "Population_within_100_km":"Population_per_km2_within_100_km"}
         var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km", "100km"])
-        var buttonSelectionX = ["Last eruption year", "Number of eruptions"]
+        var buttonSelectionX = ["Last eruption year", "Number of eruptions", "Elevation"]
         var buttonSelectionY = ["Total population", "Population per km2"]
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
@@ -112,6 +113,7 @@
                         Country: d.Country,
                         Primary_Volcano_Type: d.Primary_Volcano_Type,
                         Last_Eruption_Year: +d.Last_Eruption_Year,
+                        Elevation: +d.Elevation,
                         Number_Of_Eruptions: +d.Number_Of_Erruptions,
                         value: +d[grpName],
                         value2: +d[nameDictionary[grpName]]
@@ -184,8 +186,8 @@
             .enter()
             .append("circle")
             .attr("cx", function (d) {
-                return (d3.select("#selectButtonX").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year): x(d.Number_Of_Eruptions) ;
-                // return  x(d.Last_Eruption_Year);
+                var xButton = d3.select("#selectButtonX").property("value")
+                return (xButton == "Last eruption year") ? x(d.Last_Eruption_Year) : (xButton == "Number of eruptions" ? x(d.Number_Of_Eruptions): x(d.Elevation)) ;
             })
             .attr("cy", function (d) {
                 return y(d.value)
@@ -283,7 +285,7 @@
                 if (!idleTimeout) return idleTimeout = setTimeout(idled, idleDelay);
                 var typeX = d3.select("#selectButtonX").property("value")
                 var typeY = d3.select("#selectButtonY").property("value")
-                x.domain( (typeX == "Last eruption year") ? xDomainLastEruption : xDomainNumberEruptions);
+                x.domain( (typeX == "Last eruption year") ? xDomainLastEruption : (typeX == "Number of eruptions" ? xDomainNumberEruptions : xElevation));
                 y.domain((typeY == "Total population") ? yDomainTotal : yDomainPerKm);
             } else {
                 var s = e.selection
@@ -305,7 +307,8 @@
             scatterSvg.select("#axis--y").transition().call(yAxis);
             scatter.selectAll("circle").transition(t)
                 .attr("cx", function (d) {
-                    return (d3.select("#selectButtonX").property("value") == "Last eruption year") ? x(d.Last_Eruption_Year) : x(d.Number_Of_Eruptions) ;
+                    var xButton = d3.select("#selectButtonX").property("value")
+                    return (xButton == "Last eruption year") ? x(d.Last_Eruption_Year) : (xButton == "Number of eruptions" ? x(d.Number_Of_Eruptions): x(d.Elevation)) ;
                 })
                 .attr("cy", function (d) {
                     return (d3.select("#selectButtonY").property("value") == "Total population") ? y(d.value) :  y(d.value2);
