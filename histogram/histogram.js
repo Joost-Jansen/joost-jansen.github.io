@@ -1,6 +1,6 @@
 // @ts-check
 {
-    var margin = {top: 10, right: 30, bottom: 45, left: 20}
+    var margin = {top: 10, right: 50, bottom: 45, left: 20}
 
     var histogramSvgElement = d3.select("#histogramSvg");
     
