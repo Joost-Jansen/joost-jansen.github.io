@@ -44,7 +44,6 @@
             .call(d3.axisRight(yScale).ticks(5));
 
         var pan = d3.zoom()
-            .scaleExtent([1, 1])
             .translateExtent([[-Infinity, Infinity], [getHistogramWidth() + margin.left + margin.right, Infinity]])
             .on("zoom", handlePan)
             .on("end", drawHistogram);
@@ -70,17 +69,12 @@
 
             // Extend domain to enable sideways scrolling
             var domain = [x.invert(-getHistogramWidth()), x.invert(2*getHistogramWidth())];
-            console.log(domain)
-
-            // Compute ticks
-            var y0 = domain[0].getFullYear();
-            var years = Array.from({length:(domain[1].getFullYear() - y0)}, (_,i) => new Date(y0 + i, 0, 0));
 
             // Create histogram
             var hist = d3.histogram()
                 .value(d => new Date(+d["Start Year"], +d["Start Month"], +d["Start Day"]))
                 .domain(domain)
-                .thresholds(years);
+                .thresholds(d3.scaleTime().domain(domain).ticks(300));
             var bins = hist(data);
 
             // Rescale yAxis for new bins
