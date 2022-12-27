@@ -23,18 +23,9 @@
         if (isVolcanoInsideRegion(c) && selectedVolcanoNumbersHistogram.indexOf(d.Volcano_Number))
           selectedVolcanoNames.push(d.Volcano_Number);
       });
-    updateScatterplot(selectedVolcanoNames, [])
 }
 
-  function updateScatterplot(selectedVolcanoNames, hoverVolcanoNames){
-      scatter.selectAll("circle")
-          .transition()
-          .duration('100')
-          .attr("r", 3)
-          .style("opacity", function (dot) {
-              return (selectedVolcanoNames.indexOf(dot.Volcano_Number) > 0) ? 1 : 0.1
-          });
-  }
+  
 
   // add our function to the list of "region adjust" events (in order to have it be called on each 
   // user adjustment to the region)

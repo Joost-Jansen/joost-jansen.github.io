@@ -1,8 +1,7 @@
 // @ts-check
 {
     const scatterMargin = {top: 20, right: 10, bottom: 50, left: 65}
-    const scatterWidth = 450 - scatterMargin.left - scatterMargin.right
-    const scatterHeight = 300 - scatterMargin.top - scatterMargin.bottom;
+
     // A color scale: one color for each group
     let myColor = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -13,51 +12,50 @@
     const yDomainPerKm = [0, 60000]
 
 
-// append the svg object to the body of the page
-    let scatterSvg = d3.select("#scatterplot")
-        .append("svg")
-        .attr("width", scatterWidth + scatterMargin.left + scatterMargin.right)
-        .attr("height", scatterHeight + scatterMargin.top + scatterMargin.bottom)
+    // append the svg object to the body of the page
+    let scatterSvgElement = d3.select("#scatterplotSvg")
+        
+    let getScatterWidth = () => getWidth(scatterSvgElement) - scatterMargin.left - scatterMargin.right;
+    let getScatterHeight = () => getHeight(scatterSvgElement) - scatterMargin.top - scatterMargin.bottom;
+
+    let scatterSvg = scatterSvgElement
         .append("g")
+        .attr("id", "scatterPoints")
         .attr("transform",
             "translate(" + scatterMargin.left + "," + scatterMargin.top + ")");
 
-    // hover at plot
-    let tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-
     let x = d3.scaleLinear()
         .domain(xDomainLastEruption)
-        .range([0, scatterWidth]);
+        .range([0, getScatterWidth()]);
 
     let y = d3.scaleLinear()
         .domain(yDomainTotal)
-        .range([scatterHeight, 0]);
+        .range([getScatterHeight(), 0]);
 
     let xAxis = d3.axisBottom(x).ticks(10).tickFormat(x => x),
-        yAxis = d3.axisLeft(y).ticks(12 * scatterHeight / scatterWidth);
+        yAxis = d3.axisLeft(y).ticks(12 * getScatterHeight() / getScatterWidth());
 
     let scatterClip = scatterSvg.append("defs").append("svg:clipPath")
         .attr("id", "clip2")
         .append("svg:rect")
-        .attr("width", scatterWidth)
-        .attr("height", scatterHeight)
+        .attr("width", getScatterWidth())
+        .attr("height", getScatterHeight())
         .attr("x", 0)
         .attr("y", 0);
     // Add x-axis
     scatterSvg.append("g")
         .attr("class", "x axis")
         .attr('id', "axis--x")
-        .attr("transform", "translate(0," + scatterHeight + ")")
+        .attr("transform", "translate(0," + getScatterHeight() + ")")
         .call(xAxis);
 
     // Add x-label
     var xAxisText = scatterSvg.append("text")
         .style("text-anchor", "end")
-        .attr("x", scatterWidth)
-        .attr("y", scatterHeight + 30)
-        .text("Last Eruption Year");
+        .attr("x", getScatterWidth())
+        .attr("y", getScatterHeight() + 30)
+        .text("Last Eruption Year")
+        .style("font-size", "11px");
 
     // Add y-axis
     scatterSvg.append("g")
@@ -71,15 +69,20 @@
         .attr("y", 0)
         .attr("dy", "1em")
         .style("text-anchor", "end")
-        .text("Population");
+        .text("Population")
+        .style("font-size", "11px");
 
-    // Add titel
+    // Add title
     var titel = scatterSvg.append("text")
-        .style("text-anchor", "end")
-        .style("font-family", "fantasy")
-        .attr("x", scatterWidth - 40)
-        .attr("y", 2)
-        .text("Total population compared to last eruption year");
+        .attr("class", "scatter title")
+        .attr("text-anchor", "middle")
+        .attr("x",  getScatterWidth()/2)
+        .attr("y", 0 - (margin.top/2))
+        .text("Total population compared to last eruption year")
+        .style("font-size", "16px")
+
+
+    // .attr("text-align", "center")
 
     scatter = scatterSvg.append("g")
         .attr("id", "scatterplot")
@@ -154,7 +157,7 @@
                 updateAxis(selectedOptionX, selectedOptionY)
             })
 
-        var brush = d3.brush().extent([[0, 0], [scatterWidth, scatterHeight]]).on("end", function (e) {
+        var brush = d3.brush().extent([[0, 0], [getScatterWidth(), getScatterHeight()]]).on("end", function (e) {
                 brushended(e)
             }),
             idleTimeout,
@@ -192,54 +195,14 @@
             .attr("cy", function (d) {
                 return y(d.value)
             })
-            .attr("r", 3)
-            .attr("stroke", "white")
-            .attr("pointer-events", "all")
-            // to color on volcano type
-            // .style("fill", function(d){ return myColor2(d.Primary_Volcano_Type) })
-            .on('mouseover', function (e, d) {
-                // Changes cursor
-                d3.select(this).transition().style("cursor", "pointer")
-                // Changes size of circle
-                d3.select("#scatterplot").selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", circleSizeHover);
+            .attr("r", scatterCircleSize)
+            .attr("pointer-events", "all");
 
-                volcanoes.selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", 20)
-
-                // hover tooltip
-                updateTooltip(e, d, tooltip)
-            })
-            .on('mouseleave', function (e, d, i) {
-                // Changes size of circle back
-                d3.select("#scatterplot").selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    }).transition()
-                    .duration('200')
-                    .attr("r", circleSize);
-
-
-                volcanoes.selectAll("circle")
-                    .filter(function (dot) {
-                        return (dot.Volcano_Number == d.Volcano_Number)
-                    })
-                    .transition()
-                    .duration('100')
-                    .attr("r", volcanoIconSize);
-
-                updateTooltip(e, d, tooltip)
-            });
+        resizeScatterPoint = (sp, size) => {
+            sp.transition()
+                .duration(100)
+                .attr("r", size);        
+        }
 
         // Add a legend (interactive)
         scatterSvg
@@ -251,7 +214,7 @@
             .attr('x', function (d, i) {
                 return i * 50
             })
-            .attr('y', scatterHeight + 40)
+            .attr('y', getScatterHeight() + 40)
             .text(function (d) {
                 return prettyNamesPopulation(d.name);
             })
@@ -261,8 +224,8 @@
             .style("font-size", 15)
             .on("click", function (e, d) {
                 // is the element currently visible ?
-                currentOpacity = d3.selectAll("." + d.name).style("opacity")
-                currentOpacityText = d3.select(this).style("opacity");
+                var currentOpacity = parseFloat(d3.selectAll("." + d.name).style("opacity"));
+                var currentOpacityText = parseFloat(d3.select(this).style("opacity"));
                 // Change the opacity: from 0 to 1 or from 1 to 0
 
                 d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0.1 : 1)
@@ -323,24 +286,26 @@
             brushended(null)
         }
 
+        setScatterReady();
+    });
 
-        function updateTooltip(e, d, tooltip){
-            if (tooltip.style("opacity") == 0){
-                tooltip.transition()
-                    .duration(100)
-                    .style("opacity", 1);
-                tooltip.html("Volcano Name: " + d.Volcano_Name + "<br>" +
-                    "Volcano Type: " + d.Primary_Volcano_Type + "<br>" +
-                    "Eruption Year: " + d.Last_Eruption_Year + "<br>" +
-                    "Population: " + d3.format(",")(d.value))
-                    .style("left", (e.pageX + 10) + "px")
-                    .style("top", (e.pageY) + "px");
+    function changeOpacityOnRegionSelect(){
+        volcanoes
+            .selectAll("circle")
+            .each((d, i, circles) => {
+                let c = d3.select(circles[i]);
+                let sps = scatterVolcanoIndex[d.Volcano_Number]
+                if (sps != undefined) sps.forEach(sp => {
+                    sp.transition()
+                        .duration(100)
+                        .style("display", _ => {
+                            return isVolcanoInsideRegion(c) ? "block" : "none"
+                        });
+                        
+                });
+            });
+    }
 
-            } else{
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", 0);
-            }
-        }
-    })
+    onRegionAdjustEvents.push(changeOpacityOnRegionSelect);
+    onMapReadyEvents.push(changeOpacityOnRegionSelect);
 };

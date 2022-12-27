@@ -1,21 +1,20 @@
 // @ts-check
 {
-    var margin = {top: 30, right: 60, bottom: 50, left: 30}
-    var width = 800 - margin.left - margin.right
-    var height = 150 - margin.top - margin.bottom;
+    var margin = {top: 10, right: 30, bottom: 45, left: 20}
 
-    var svg = d3.select("#histogram")
-        .append("svg")
-        .attr("width", width + margin.right + margin.left)
-        .attr("height", height + margin.bottom + margin.top)
+    var histogramSvgElement = d3.select("#histogramSvg");
+    
+    let getHistogramWidth = () => getWidth(histogramSvgElement) - margin.left - margin.right;
+    let getHistogramHeight = () => getHeight(histogramSvgElement) - margin.top - margin.bottom;
+
+    var svg = d3.select("#histogramSvg")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
     var palette = {
         grey: "#e1e1e1",
-        orange: "#fcab71",
+        red: "#e03030",
     };
-
 
     d3.csv('data/GVP_Eruption_Results.csv').then((data) => {
 
@@ -24,14 +23,14 @@
          */
         var xScale = d3.scaleTime()
             .domain([new Date(1900, 0, 0), new Date()])
-            .range([0, width]);
+            .range([0, getHistogramWidth()]);
 
         slider = d3.sliderBottom(xScale)
             .step(10)
             .displayFormat(d3.timeFormat("%G"))
             .ticks(10)
             .default([new Date(1950, 0, 0), new Date(2000, 0, 0)])
-            .fill(palette.orange)
+            .fill(palette.red)
             .on('onchange', onSliderAdjust);
 
         /**
@@ -39,28 +38,28 @@
          */
         var yScale = d3.scaleLinear()
             .domain([0, 100])
-            .range([height, 0]);
+            .range([getHistogramHeight(), 0]);
         var yAxis = svg.append("g")
-            .attr("transform", `translate(${width+15},0)`)
+            .attr("transform", `translate(${getHistogramWidth()+15},0)`)
             .call(d3.axisRight(yScale).ticks(5));
 
         var pan = d3.zoom()
             .scaleExtent([1, 1])
-            .translateExtent([[-Infinity, Infinity], [width + margin.left + margin.right, Infinity]])
+            .translateExtent([[-Infinity, Infinity], [getHistogramWidth() + margin.left + margin.right, Infinity]])
             .on("zoom", handlePan)
             .on("end", drawHistogram);
 
         svg.append("defs").append("SVG:clipPath")
             .attr("id", "clip")
             .append("SVG:rect")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", getHistogramWidth())
+            .attr("height", getHistogramHeight())
             .attr("x", 0)
             .attr("y", 0);
 
         var x = xScale.copy();
         var bars = svg.append("g").attr("clip-path", "url(#clip)");
-        var g = svg.append("g").attr("transform", `translate(0,${height})`);
+        var g = svg.append("g").attr("transform", `translate(0,${getHistogramHeight()})`);
         g.call(slider);
 
 
@@ -70,7 +69,7 @@
         function drawHistogram() {
 
             // Extend domain to enable sideways scrolling
-            var domain = [x.invert(-width), x.invert(2*width)];
+            var domain = [x.invert(-getHistogramWidth()), x.invert(2*getHistogramWidth())];
             console.log(domain)
 
             // Compute ticks
@@ -98,7 +97,7 @@
                 .append("rect")
                 .attr("x", 1)
                 .attr("transform", d => `translate(${x(d.x0)},${yScale(d.length)})`)
-                .attr("height", d => height - yScale(d.length))
+                .attr("height", d => getHistogramHeight() - yScale(d.length))
                 .attr("width", d => x(d.x1) - x(d.x0));
 
             // Highlight the selected bars
@@ -122,7 +121,7 @@
             x = event.transform.rescaleX(xScale);
             bars.selectAll("rect")
                 .attr("transform", d => `translate(${x(d.x0)},${yScale(d.length)})`)
-                .attr("height", d => height - yScale(d.length))
+                .attr("height", d => getHistogramHeight() - yScale(d.length))
                 .attr("width", d => x(d.x1) - x(d.x0));
 
             // Compute the new selection
@@ -139,7 +138,7 @@
         function highlightSelection() {
             var [from, to] = slider.value();
             bars.selectAll("rect")
-                .attr('fill', d => (from <= d.x1 && d.x0 <= to) ? palette.orange : palette.grey);
+                .attr('fill', d => (from <= d.x1 && d.x0 <= to) ? palette.red : palette.grey);
         }
 
         // Called every time the slider is adjusted
@@ -172,8 +171,8 @@
 
         // This thingy listens to all zoom / pan events
         svg.append("rect")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("width", getHistogramWidth())
+            .attr("height", getHistogramHeight())
             .style("fill", "#00000000")
             .style("pointer-event", "all")
             .call(pan);

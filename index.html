@@ -2,38 +2,67 @@
 <meta charset='utf-8'>
 <html>
 <head>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@900&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">  
+    <script src="https://d3js.org/d3.v7.min.js" defer></script>
+    <script src="https://d3js.org/topojson.v1.min.js" defer></script>
     <script src="global.js"></script>
-    <script src="/world-map/demo.js" defer></script>
+    <link rel="stylesheet" href="style.css">
     <script src="histogram/histogram.js" defer ></script>
+    <link rel="stylesheet" href="/histogram/histogram.css">
     <script src='/scatterplot/scatterplot.js' defer></script>
     <link rel="stylesheet" href="/scatterplot/scatterplot.css">
     <link rel="stylesheet" href="global.css">
     <script src="/world-map/map.js" defer></script>
     <link rel="stylesheet" href="/world-map/map.css">
-    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/d3-simple-slider"></script>
 
 </head>
 <body>
-
-    <div class="grid-container">
-        <div class="grid-child left">
-            <div id="histogram"></div>
-            <div id="mapSection">
-                <div id="worldMap"></div>
-                <button type="button" class="mapButton" id="selectRegionButton">select region</button>
-                <button type="button" class="mapButton" id="clearRegionButton">clear</button>
+    <div id="mainGrid">
+        <div id="histogram" class="gridElement">
+            <svg id="histogramSvg" width="100%" height="100%"></svg>
+        </div>
+        <div id="worldMap" class="gridElement">
+            <svg id="mapSvg" width="100%" height="100%"></svg>
+            <div id="mapButtonSection">
+                <button type="button" class="dashboardButton" id="selectRegionButton">select region</button>
+                <button type="button" class="dashboardButton" id="clearRegionButton">clear</button>
             </div>
         </div>
-        <div class="grid-child right">
-            <div id="scatterplotSection"></div>
-                <div id="scatterplot"></div>
-                <button type="button" class="scatterplotButton" id="zoomOutButton">reset zoom</button>
-                <select id="selectButtonX"></select>
-                <select id="selectButtonY"></select>
+        <div id="scatterplot" class="gridElement">
+            <svg id="scatterplotSvg" width="100%", height="90%"></svg>
+            <div id="scatterplotButtonSection" width="100%" height="10%">
+                <button type="button" class="dashboardButton" id="zoomOutButton">reset zoom</button>
+                <select id="selectButtonX" class="dashboardButton"></select>
+                <select id="selectButtonY" class="dashboardButton"></select>
             </div>
         </div>
+        <div id="descriptionText" class="gridElement">
+            <h1>Volcanoes World Wide</h1>
+            <div id="descriptionTextContent">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+                    Donec euismod ante ante, ut imperdiet erat congue quis. 
+                    Vestibulum id diam egestas, auctor nunc nec, eleifend nibh. 
+                    Suspendisse tempus, diam at dignissim vulputate, ante quam volutpat leo, 
+                    a scelerisque lacus ante auctor erat. 
+                </p>
+                <p>
+                    Etiam maximus nibh ligula, a suscipit nunc elementum quis. 
+                    Quisque ut nisi vel lectus pharetra viverra. 
+                    Vivamus lectus risus, mollis nec lectus id, consectetur scelerisque ex. 
+                    Pellentesque a pulvinar nisl, quis ultrices nulla.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div id="tooltip">
+        <div class="tooltipTag">Volcano name</div>: <div id="tooltipVolcanoName"></div><br>
+        <div class="tooltipTag">Volcano type</div>: <div id="tooltipVolcanoType"></div><br>
+        <div class="tooltipTag">Year of last eruption</div>: <div id="tooltipLastEruptionYear"></div><br>
+        <div class="tooltipTag">Population in 100km radius</div>: <div id="tooltipPopulation"></div><br>
     </div>
 </body>
 </html>
