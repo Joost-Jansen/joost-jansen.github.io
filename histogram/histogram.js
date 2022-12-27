@@ -72,7 +72,7 @@
 
             // Create histogram
             var hist = d3.histogram()
-                .value(d => new Date(+d["Start Year"], +d["Start Month"], +d["Start Day"]))
+                .value(toDate)
                 .domain(domain)
                 .thresholds(d3.scaleTime().domain(domain).ticks(300));
             var bins = hist(data);
@@ -139,10 +139,7 @@
         function onSliderAdjust() {
             var [from, to] = slider.value();
             selectedVolcanoNumbersHistogram = [...new Set(data
-                .filter(function (d) {
-                    var date = new Date(+d["Start Year"], +d["Start Month"], +d["Start Day"]);
-                    return (from <= date && date <= to);
-                })
+                .filter(d => from <= toDate(d) && toDate(d) <= to)
                 .map(d => d["Volcano Number"]))]
             onTimeAdjustEvents.forEach(e => e());
             highlightSelection();
@@ -169,4 +166,21 @@
             .style("pointer-event", "all")
             .call(pan);
     });
+
+    /**
+     * Convert data point to Date object
+     * 
+     * @param {*} data a GVP_Eruption_Results data point
+     * @returns the corresponding Date object
+     */
+    function toDate(data) {
+
+        // Month is zero indexed (January is month 0)
+        var date = new Date(0, +data["Start Month"]-1, +data["Start Day"]);
+
+        // The Date constructor maps years 0-99 to 1900-1999 (!)
+        // This method does the correct thing
+        date.setFullYear(+data["Start Year"]);
+        return date
+    }
 };
