@@ -94,8 +94,7 @@
     dataCSV.then(function (data) {
 
         // List of groups (here I have one group per column)
-        var allGroupTypes = ['Shield', 'Stratovolcano', 'Caldera', 'Submarine', 'Fissure vent', 'Complex',
-            'Cone', 'Volcanic field', 'Dome', 'Compound', 'Maar', 'Crater', 'Ring', 'Subglacial']
+
         var allGroupPopulationTotal = ["Population_within_5_km", "Population_within_10_km", "Population_within_30_km", "Population_within_100_km"]
         var nameDictionary = { "Population_within_5_km":"Population_per_km2_within_5_km",
                                         "Population_within_10_km":"Population_per_km2_within_10_km",
@@ -104,6 +103,7 @@
         var prettyNamesPopulation = d3.scaleOrdinal(["5km", "10km", "30km", "100km"])
         var buttonSelectionX = ["Last eruption year", "Number of eruptions", "Elevation"]
         var buttonSelectionY = ["Total population", "Population per km2"]
+        var buttonTypes = ["All" , 'Caldera', 'Cone', 'Shield', 'Stratovolcano', 'Submarine', 'Other']
 
         // Reformat the data: we need an array of arrays of {x, y} tuples
         var dataReady = allGroupPopulationTotal.map(function (grpName) { // .map allows to do something for each element of the list
@@ -114,7 +114,7 @@
                         Volcano_Number: d.Volcano_Number,
                         Volcano_Name: d.Volcano_Name,
                         Country: d.Country,
-                        Primary_Volcano_Type: d.Primary_Volcano_Type,
+                        Volcano_Type: d.Volcano_Type,
                         Last_Eruption_Year: +d.Last_Eruption_Year,
                         Elevation: +d.Elevation,
                         Number_Of_Eruptions: +d.Number_Of_Erruptions,
@@ -156,6 +156,25 @@
                 var selectedOptionY = d3.select(this).property("value")
                 updateAxis(selectedOptionX, selectedOptionY)
             })
+
+        // add the options to the button
+        d3.select("#typeButton")
+            .selectAll('myOptionsType')
+            .data(buttonTypes)
+            .enter()
+            .append('option')
+            .text(function (d) { return d; }) // text showed in the menu
+            .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+        d3.select("#typeButton").on("change", function(d) {
+            // recover the option that has been chosen
+            var selectedType = d3.select("#typeButton").property("value")
+            scatter.selectAll("circle").style("display", function (d) {
+                return (selectedType == 'All') ? 'block' : ((d.Volcano_Type == selectedType) ? 'block' : 'none')
+            } )
+        })
+
+
 
         var brush = d3.brush().extent([[0, 0], [getScatterWidth(), getScatterHeight()]]).on("end", function (e) {
                 brushended(e)
