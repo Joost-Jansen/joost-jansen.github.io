@@ -168,7 +168,8 @@
             .attr("height", getHistogramHeight())
             .style("fill", "#00000000")
             .style("pointer-event", "all")
-            .call(pan);
+            .call(pan)
+            .on("dblclick.zoom", null);
     });
 
     /**
