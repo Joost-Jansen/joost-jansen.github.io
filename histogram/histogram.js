@@ -1,6 +1,7 @@
 // @ts-check
 {
     var margin = {top: 10, right: 50, bottom: 45, left: 20}
+    const Y_MIN = 5;  // minimum y axis value
 
     var histogramSvgElement = d3.select("#histogramSvg");
     
@@ -78,7 +79,10 @@
             var bins = hist(data);
 
             // Rescale yAxis for new bins
-            yScale.domain([0, d3.max(bins.map(d => d.length))]);
+            var yMax = d3.max(bins
+                .filter(d => d.x0 > x.invert(0) && d.x1 < x.invert(getHistogramWidth()))
+                .map(d => d.length));
+            yScale.domain([0, Math.max(Y_MIN, yMax)]);
             yAxis.call(d3.axisRight(yScale).ticks(5)).call(g => g.select('.domain').remove());
 
             // Remove old bars
