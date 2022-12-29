@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@900&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">  
     <script src="https://d3js.org/d3.v7.min.js" defer></script>
     <script src="https://d3js.org/topojson.v1.min.js" defer></script>
-    <script src="global.js"></script>
     <link rel="stylesheet" href="style.css">
+    <script src="global.js"></script>
     <script src="histogram/histogram.js" defer ></script>
     <link rel="stylesheet" href="/histogram/histogram.css">
     <script src='/scatterplot/scatterplot.js' defer></script>
@@ -37,8 +37,7 @@
                 <button type="button" class="dashboardButton" id="zoomOutButton">Reset zoom</button>
                 <select id="selectButtonX" class="dashboardButton"></select>
                 <select id="selectButtonY" class="dashboardButton"></select>
-                <select id="typeButton" class="dashboardButton"></select>
-<!--                <button type="button" class="dashboardButton" id="typeButton">Type</button>-->
+<!--                <select id="typeButton" class="dashboardButton"></select>-->
             </div>
         </div>
         <div id="descriptionText" class="gridElement">
@@ -53,6 +52,7 @@
                     and will serve as a valuable resource for those interested in the science of volcanoes.
                     Thank you for using our tool, and we hope you find it informative and enjoyable.
                 </p>
+                Select type: <select id="typeButton" class="dashboardButton"></select>
             </div>
         </div>
     </div>

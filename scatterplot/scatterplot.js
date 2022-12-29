@@ -155,25 +155,6 @@
                 updateAxis(selectedOptionX, selectedOptionY)
             })
 
-        // add the options to the button
-        d3.select("#typeButton")
-            .selectAll('myOptionsType')
-            .data(buttonTypes)
-            .enter()
-            .append('option')
-            .text(function (d) { return d; }) // text showed in the menu
-            .attr("value", function (d) { return d; }) // corresponding value returned by the button
-
-        d3.select("#typeButton").on("change", function(d) {
-            // recover the option that has been chosen
-            var selectedType = d3.select("#typeButton").property("value")
-            scatter.selectAll("circle").style("display", function (d) {
-                return (selectedType == 'All') ? 'block' : ((d.Volcano_Type == selectedType) ? 'block' : 'none')
-            } )
-        })
-
-
-
         var brush = d3.brush().extent([[0, 0], [getScatterWidth(), getScatterHeight()]]).on("end", function (e) {
                 brushended(e)
             }),
@@ -316,7 +297,8 @@
                     sp.transition()
                         .duration(100)
                         .style("display", _ => {
-                            return isVolcanoInsideRegion(c) ? "block" : "none"
+                            selectedType = d3.select("#typeButton").property("value");
+                            return isVolcanoInsideRegion(c) &&  getSelectionType(d) ? "block" : "none"
                         });
                         
                 });

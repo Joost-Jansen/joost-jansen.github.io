@@ -13,6 +13,7 @@ let removeHighlightMapVolcano = v => undefined;
 let onTimeAdjustEvents = [];
 let slider = undefined;
 let selectedVolcanoNumbersHistogram = []
+let drawHistogram = v => undefined;
 
 // interface for scatter.js
 const scatterCircleSize = 4
@@ -33,18 +34,43 @@ let scatterVolcanoIndex = {};
 // only set up tooltip and highlighting when both the scatter and the map are done loading
 let scatterReady = false;
 let mapReady = false;
+let selectedType = 'All'
 
 function setMapReady() {
     mapReady = true;
-    if (scatterReady) setupTooltipAndHighlighting();
+    if (scatterReady) setupSelectionTypeTooltipAndHighlighting();
 }
 
 function setScatterReady() {
     scatterReady = true;
-    if (mapReady) setupTooltipAndHighlighting();
+    if (mapReady) setupSelectionTypeTooltipAndHighlighting();
 }
 
-function setupTooltipAndHighlighting() {
+function getSelectionType(d){
+    return (selectedType == 'All'  || d.Volcano_Type == selectedType);
+}
+
+function setupSelectionTypeTooltipAndHighlighting() {
+
+    let buttonTypes = ['All', 'Caldera', 'Cone', 'Shield', 'Stratovolcano', 'Submarine', 'Other']
+    // add the options to the button
+    d3.select("#typeButton")
+        .selectAll('myOptionsType')
+        .data(buttonTypes)
+        .enter()
+        .append('option')
+        .text(function (d) { return d; }) // text showed in the menu
+        .attr("value", function (d) { return d; }) // corresponding value returned by the button
+
+    d3.select("#typeButton").on("change", function(d) {
+        selectedType = d3.select("#typeButton").property("value");
+        changeOpacityOnRegionSelect()
+        volcanoes.selectAll("circle").transition().duration(100).style("display", function (d) {
+            return (getSelectionType(d) ? 'block' : 'none')
+        } )
+        drawHistogram()
+    })
+
 
     // make indices for quickly referencing volcanoes in both the scatterplot and the map
     let mapVolcanoIndex = {}

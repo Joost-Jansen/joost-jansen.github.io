@@ -66,7 +66,10 @@
         /**
          * Draw the histogram
          */
-        function drawHistogram() {
+        drawHistogram = () => {
+            var dataFilteredType = data.filter(function (d) {
+                return getSelectionType(d)
+            })
 
             // Extend domain to enable sideways scrolling
             var domain = [x.invert(-getHistogramWidth()), x.invert(2*getHistogramWidth())];
@@ -81,7 +84,7 @@
                 .value(d => new Date(+d["Start Year"], +d["Start Month"], +d["Start Day"]))
                 .domain(domain)
                 .thresholds(years);
-            var bins = hist(data);
+            var bins = hist(dataFilteredType);
 
             // Rescale yAxis for new bins
             yScale.domain([0, d3.max(bins.map(d => d.length))]);
