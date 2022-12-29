@@ -42,6 +42,7 @@
         .attr("height", getScatterHeight())
         .attr("x", 0)
         .attr("y", 0);
+    
     // Add x-axis
     scatterSvg.append("g")
         .attr("class", "x axis")
@@ -80,9 +81,6 @@
         .attr("y", 0 - (margin.top/2))
         .text("Total population compared to last eruption year")
         .style("font-size", "16px")
-
-
-    // .attr("text-align", "center")
 
     scatter = scatterSvg.append("g")
         .attr("id", "scatterplot")

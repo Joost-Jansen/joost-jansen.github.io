@@ -146,12 +146,10 @@
             var [from, to] = slider.value();
             selectedVolcanoNumbersHistogram = [...new Set(data
                 .filter(function (d) {
-                        return parseInt(d["Start Year"]) >= from.getFullYear() && parseInt(d["Start Year"]) <= to.getFullYear()
-                    }
-                ).map(function (d) {
-                    return d["Volcano Number"]
-                }))]
-
+                    var date = new Date(+d["Start Year"], +d["Start Month"], +d["Start Day"]);
+                    return (from <= date && date <= to);
+                })
+                .map(d => d["Volcano Number"]))]
             onTimeAdjustEvents.forEach(e => e());
             highlightSelection();
         }
