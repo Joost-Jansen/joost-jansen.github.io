@@ -66,7 +66,6 @@
             .call(d3.axisRight(yScale).ticks(5));
 
         var pan = d3.zoom()
-            .translateExtent([[-Infinity, Infinity], [getHistogramWidth() + margin.left + margin.right, Infinity]])
             .on("zoom", handlePan)
             .on("end", drawHistogram);
 
