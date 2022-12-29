@@ -17,6 +17,26 @@
         red: "#e03030",
     };
 
+    /**
+     * Pretty years tick format
+     * 
+     * Identical to the default time tick format, except
+     * for years. This format displays:
+     *  79 instead of 0079
+     *  10 BCE instead of -0010
+     *  10000 BCE instead of -0000 (!)
+     * @param {Date} date
+     * @returns a pretty formatted date
+     */
+    function prettyYearsTickFormat(date) {
+        var defaultFormat = d3.scaleTime().tickFormat();
+        var year = date.getFullYear();
+        return ( d3.timeYear(date) < date ? defaultFormat(date)
+            : year < 0 ? `${-1 * year} BCE`
+            : year
+        );
+    }
+
     d3.csv('data/GVP_Eruption_Results.csv').then((data) => {
 
         /**
@@ -28,7 +48,8 @@
 
         slider = d3.sliderBottom(xScale)
             .step(10)
-            .displayFormat(d3.timeFormat("%G"))
+            .tickFormat(prettyYearsTickFormat)
+            .displayFormat(d => prettyYearsTickFormat(d3.timeYear.round(d)))
             .ticks(10)
             .default([new Date(1950, 0, 0), new Date(2000, 0, 0)])
             .fill(palette.red)
