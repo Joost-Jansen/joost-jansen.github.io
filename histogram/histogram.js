@@ -1,6 +1,6 @@
 // @ts-check
 {
-    var margin = {top: 10, right: 50, bottom: 40, left: 20}
+    var margin = {top: 20, right: 50, bottom: 40, left: 20}
     const Y_MIN = 5;  // minimum y axis value
     const X_TICKS = 50; // x axis resolution (markers snap to these values)
 
@@ -15,6 +15,7 @@
 
     var palette = {
         grey: "#e1e1e1",
+        darkGrey: "#777777",
         red: "#e03030",
     };
 
@@ -99,6 +100,16 @@
         var yAxis = svg.append("g")
             .attr("transform", `translate(${getHistogramWidth()+15},0)`)
             .call(d3.axisRight(yScale).ticks(5));
+
+        // y axis label
+        svg.append("text")
+            .attr("id", "yAxisLabel")
+            .attr("text-anchor", "end")
+            .attr("x", getHistogramWidth() + 35)
+            .attr("y", -10)
+            .style("fill", palette.darkGrey)
+            .text("number of eruptions");
+
 
         var zoom = d3.zoom()
             .on("zoom", handlePan)
