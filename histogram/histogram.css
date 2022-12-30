@@ -1,3 +1,41 @@
 #histogramSvg {
     cursor: pointer;
 }
+
+#timeSelection input {
+    border: none;
+    border-bottom: 1px solid #e1e1e1;
+    
+}
+
+/* Chrome, Safari, Edge, Opera */
+#timeSelection input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+#timeSelection input[type=number] {
+  -moz-appearance: textfield;
+}
+
+#timeSelection label {
+    font-size: 10pt;
+    color: #777777;
+}
+
+.yearInput {
+    width: 30pt;
+}
+
+.dayInput {
+    width: 15pt;
+}
+
+.monthInput {
+    background: none;
+    width: 40pt;
+    border: none;
+    border-bottom: 1px solid #e1e1e1;
+}
