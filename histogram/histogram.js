@@ -113,7 +113,7 @@
 
         var zoom = d3.zoom()
             .on("zoom", handlePan)
-            .on("end", drawHistogram);
+            .on("end", d => drawHistogram());
 
         svg.append("defs").append("SVG:clipPath")
             .attr("id", "clip")
