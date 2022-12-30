@@ -41,6 +41,7 @@
         .attr("height", getScatterHeight())
         .attr("x", 0)
         .attr("y", 0);
+    
     // Add x-axis
     scatterSvg.append("g")
         .attr("class", "x axis")
@@ -53,7 +54,8 @@
         .style("text-anchor", "end")
         .attr("x", getScatterWidth())
         .attr("y", getScatterHeight() + 30)
-        .text("Last Eruption Year");
+        .text("Last Eruption Year")
+        .style("font-size", "11px");
 
     // Add y-axis
     scatterSvg.append("g")
@@ -67,15 +69,17 @@
         .attr("y", 0)
         .attr("dy", "1em")
         .style("text-anchor", "end")
-        .text("Population");
-        
+        .text("Population")
+        .style("font-size", "11px");
+
     // Add title
     var titel = scatterSvg.append("text")
-        .style("text-anchor", "end")
-        .style("font-size", "20px")
-        .attr("x", getScatterWidth() - 40)
-        .attr("y", 2)
-        .text("Total population compared to last eruption year");
+        .attr("class", "scatter title")
+        .attr("text-anchor", "middle")
+        .attr("x",  getScatterWidth()/2)
+        .attr("y", 0 - (margin.top/2))
+        .text("Total population compared to last eruption year")
+        .style("font-size", "16px")
 
     scatter = scatterSvg.append("g")
         .attr("id", "scatterplot")
